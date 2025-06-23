@@ -77,7 +77,8 @@ Where:
 ### From GitHub (Recommended)
 
 ```r
-install.packages("https://github.com/Arnaroo/FracFixR/releases/download/v1.0.0/FracFixR_1.0.0.tar.gz",repos = NULL,type = "source")```
+install.packages("https://github.com/Arnaroo/FracFixR/releases/download/v1.0.0/FracFixR_1.0.0.tar.gz",repos = NULL,type = "source")
+```
 
 ### From GitHub (Development Version)
 
