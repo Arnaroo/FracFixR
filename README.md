@@ -88,7 +88,7 @@ if (!requireNamespace("devtools", quietly = TRUE))
   install.packages("devtools")
 
 # Install FracFixR from GitHub
-devtools::install_github("Arnaroo/FracFixR")
+devtools::install_github("Arnaroo/FracFixR/CRAN")
 ```
 
 ### Verify Installation
