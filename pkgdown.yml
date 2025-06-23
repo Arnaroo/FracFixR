@@ -1,0 +1,60 @@
+url: https://arnaroo.github.io/FracFixR/
+
+template:
+  bootstrap: 5
+  bootswatch: cosmo
+  
+home:
+  title: FracFixR - RNA Fraction Correction Framework
+  description: >
+    A compositional statistical framework for absolute proportion estimation 
+    between fractions in RNA sequencing data.
+
+navbar:
+  structure:
+    left:  [intro, reference, articles, tutorials, news]
+    right: [search, github]
+  components:
+    home:
+      icon: fas fa-home fa-lg
+      href: index.html
+    reference:
+      text: Reference
+      href: reference/index.html
+    articles:
+      text: Articles
+      menu:
+      - text: Introduction to FracFixR
+        href: articles/FracFixR-intro.html
+    github:
+      icon: fab fa-github fa-lg
+      href: https://github.com/Arnaroo/FracFixR/
+
+reference:
+- title: Main Functions
+  desc: Core functions for fraction correction
+  contents:
+  - FracFixR
+  - DiffPropTest
+  
+- title: Visualization
+  desc: Functions for plotting results
+  contents:
+  - PlotFractions
+  - PlotComparison
+  
+- title: Data
+  desc: Example datasets included with the package
+  contents:
+  - example_counts
+  - example_annotation
+  - polysome_annotation
+  - subcellular_annotation
+
+authors:
+  Alice Cleynen:
+    href: https://www.umontpellier.fr/
+  Agin Ravindran:
+    href: https://anu.edu.au/
+  Nikolay Shirokikh:
+    href: https://www.uwa.edu.au/
