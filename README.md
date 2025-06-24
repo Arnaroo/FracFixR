@@ -584,27 +584,24 @@ diff_results <- DiffPropTest(results,
 
 If you use FracFixR in your research, please cite:
 
-> Cleynen A, Ravindran A, Shirokikh N (2024). FracFixR: A compositional 
+> Cleynen A, Ravindran A, Shirokikh N (2025). FracFixR: A compositional 
 > statistical framework for absolute proportion estimation between fractions 
-> in RNA sequencing data. Bioinformatics, btx###. 
-> doi: 10.1093/bioinformatics/btx###
 
 ## Contact
 
-- **Bug Reports**: https://github.com/Arnaroo/FracFixR/issues
-- **Feature Requests**: https://github.com/Arnaroo/FracFixR/issues
-- **General Questions**: fracfixr@gmail.com
+- **Bug Reports**: (https://github.com/Arnaroo/FracFixR/issues)
+- **Feature Requests**: (https://github.com/Arnaroo/FracFixR/issues)
 
 ### Authors
 
 - Alice Cleynen (alice.cleynen@umontpellier.fr) - Statistical methodology
-- Agin Ravindran - Experimental data generation
+- Agin Ravindran (agin.ravindran@anu.edu.au) - Experimental data generation
 - Nikolay Shirokikh (nikolay.shirokikh@uwa.edu.au) - Conceptual framework
 
 ### Contributing
 
-We welcome contributions! Please see our Contributing Guidelines for details.
+We welcome contributions! Please see our [Contributing Guidelines](https://github.com/Arnaroo/FracFixR/blob/main/CONTRIBUTE.md) for details.
 
 ### License
 
-FracFixR is released under the CC BY-NC ND License. See LICENSE file for details.
+FracFixR is released under the [CC BY-NC ND License](https://github.com/Arnaroo/FracFixR/blob/main/LICENSE). See [LICENSE](https://github.com/Arnaroo/FracFixR/blob/main/LICENSE) file for details.
