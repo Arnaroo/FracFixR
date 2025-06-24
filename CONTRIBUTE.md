@@ -200,7 +200,7 @@ All functions must include:
 #' result <- function_name(data)
 #'
 #' @references
-#' Cleynen et al. (2024) FracFixR: A compositional framework...
+#' Cleynen et al. (2025) FracFixR: A compositional framework...
 #'
 #' @export
 function_name <- function(x, method = c("GLM", "Logit", "Wald")) {
@@ -271,7 +271,7 @@ For statistical methods, include:
 ```r
 # tests/testthat/test-validation.R
 test_that("NNLS regression matches published results", {
-  # Use data from Cleynen et al. 2024 supplementary
+  # Use data from Cleynen et al. 2025 supplementary
   published_data <- read.csv("tests/data/published_example.csv")
   published_result <- 0.847  # From paper
   
