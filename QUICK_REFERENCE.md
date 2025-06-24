@@ -2,11 +2,15 @@
 
 ## Installation
 ```r
-# From CRAN
-install.packages("FracFixR")
+# From GitHub (Recommended)
+install.packages("https://github.com/Arnaroo/FracFixR/releases/download/v1.0.0/FracFixR_1.0.0.tar.gz",repos = NULL,type = "source")
+# From GitHub (Development Version)
+# Install devtools if not already installed
+if (!requireNamespace("devtools", quietly = TRUE))
+  install.packages("devtools")
 
-# From GitHub
-devtools::install_github("Arnaroo/FracFixR")
+# Install FracFixR from GitHub
+devtools::install_github("Arnaroo/FracFixR/CRAN")
 ```
 
 ## Basic Workflow
