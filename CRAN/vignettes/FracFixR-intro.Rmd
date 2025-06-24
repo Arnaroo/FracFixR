@@ -1,0 +1,187 @@
+---
+title: "Introduction to FracFixR"
+author: "Alice Cleynen, Agin Ravindran, Nikolay Shirokikh"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to FracFixR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+## Introduction
+
+FracFixR is a compositional statistical framework for analyzing RNA-seq data from fractionation experiments. It addresses the fundamental challenge where library preparation and sequencing depth obscure the original proportions of RNA fractions.
+
+This vignette demonstrates:
+
+1. Basic usage with polysome profiling data
+2. Differential proportion testing
+3. Visualization of results
+4. Advanced applications
+
+## Installation
+
+```{r installation, eval=FALSE}
+# From CRAN
+install.packages("FracFixR")
+
+# From GitHub (development version)
+devtools::install_github("Arnaroo/FracFixR")
+```
+
+## Quick Start Example
+
+Let's simulate a simple polysome profiling experiment:
+
+```{r load_package}
+library(FracFixR)
+
+# Set seed for reproducibility
+set.seed(123)
+```
+
+### Creating Example Data
+
+```{r create_data}
+# Simulate count data for 500 genes across 12 samples
+n_genes <- 100
+n_samples <- 12
+
+# Generate count matrix with varying expression levels
+total_counts <- matrix(
+  rnbinom(n_genes * 4, mu = 100, size = 10),
+  nrow = n_genes,
+  dimnames = list(
+    paste0("Gene", 1:n_genes),
+    paste0("Sample", 1:4)
+  )
+)
+prob=c(1/4,1/4,1/2)
+
+# distribute counts evenly accross different fractions in Control
+multinom_samples <- apply(total_counts, c(1, 2), function(x) rmultinom(1, size = x, prob = prob))
+reshaped <- aperm(multinom_samples, c(3, 2, 1))  # now (n, 4, 3)
+reshaped_matrix1 <- matrix(reshaped, nrow = n_genes, ncol = 12)
+colnames(reshaped_matrix1) <- paste0("V", rep(1:4, each = 3), "_p", 1:3)
+
+counts<-cbind(total_counts[,1:2],reshaped_matrix1[,c(2:3,5:6)],total_counts[,3:4],reshaped_matrix1[,c(8:9,11:12)])
+
+# Create annotation data frame
+annotation <- data.frame(
+  Sample = colnames(counts),
+  Condition = rep(c("Control", "Treatment"), each = 6),
+  Type = rep(c("Total", "Total", "Light_Polysome", "Heavy_Polysome","Light_Polysome", "Heavy_Polysome"), 2),
+  Replicate = c("Rep1","Rep2", rep("Rep1", 2), rep("Rep2", 2), "Rep1","Rep2", rep("Rep1", 2), rep("Rep2", 2))
+)
+
+print(head(annotation))
+```
+
+### Running FracFixR
+
+```{r run_fracfixr}
+# Run the main analysis
+results <- FracFixR(MatrixCounts = counts, Annotation = annotation)
+
+# View the structure of results
+names(results)
+```
+
+### Understanding the Output
+
+The FracFixR output contains several components:
+
+```{r explore_output}
+# 1. Fraction proportions for each replicate
+print(results$Fractions)
+
+# 2. Regression coefficients
+print(results$Coefficients)
+
+# 3. Estimated Proportions (first 5 genes, first 6 samples)
+print(results$Propestimates[1:5, 1:6])
+```
+
+## Visualizing Fraction Proportions
+
+```{r plot_fractions, fig.cap="Fraction proportions across replicates"}
+# Create fraction plot
+frac_plot <- PlotFractions(results)
+print(frac_plot)
+```
+
+The plot shows:
+- The proportion of RNA in each fraction
+- The "Lost" fraction (grey) representing unrecoverable material
+- Consistency across replicates
+
+## Differential Proportion Testing
+
+Now let's identify genes with differential polysome association between conditions:
+
+```{r diff_test}
+# Test for differential proportion in heavy polysomes
+diff_heavy <- DiffPropTest(
+  NormObject = results,
+  Conditions = c("Control", "Treatment"),
+  Types = "Heavy_Polysome",
+  Test = "Logit"
+)
+
+# View top differentially associated genes
+top_genes <- diff_heavy[order(diff_heavy$padj), ]
+print(head(top_genes, 10))
+```
+
+### Interpreting Results
+
+- **mean_diff**: Difference in proportion between conditions
+- **log2FC**: Log2 fold change of proportions
+- **padj**: FDR-adjusted p-value
+
+Positive mean_diff indicates higher proportion in Treatment.
+
+## Creating a Volcano Plot
+
+```{r volcano_plot, fig.cap="Volcano plot of differential polysome association"}
+volcano <- PlotComparison(
+  diff_heavy,
+  Conditions = c("Control", "Treatment"),
+  Types = "Heavy_Polysome",
+  cutoff = 20
+)
+print(volcano)
+```
+
+### Data Requirements
+
+For real experiments, ensure your data meets these requirements:
+
+1. **Count Matrix**: Raw counts (not normalized)
+2. **Annotation**: Must include:
+   - Sample names matching count matrix columns
+   - At least one "Total" sample per condition-replicate
+   - Consistent fraction names across replicates
+
+
+## Session Info
+
+```{r session_info}
+sessionInfo()
+```
+
+## References
+
+Cleynen A, Ravindran A, Shirokikh N (2025). FracFixR: A compositional statistical framework for absolute proportion estimation between fractions in RNA sequencing data. 
+
+For more examples and advanced usage, see the [FracFixR GitHub repository](https://github.com/Arnaroo/FracFixR).
