@@ -582,10 +582,20 @@ diff_results <- DiffPropTest(results,
 
 ## Citation
 
-If you use FracFixR in your research, please cite:
+If you use FracFixR in your research, please cite both the software and the accompanying manuscript.
 
-> Cleynen A, Ravindran A, Shirokikh N (2025). FracFixR: A compositional 
-> statistical framework for absolute proportion estimation between fractions 
+**Software (always resolves to the latest archived release):**
+
+> Cleynen A, Ravindran A, Shirokikh NE (2026). *FracFixR: A compositional statistical framework for absolute proportion estimation between fractions.* Zenodo. https://doi.org/10.5281/zenodo.20234583
+
+**This specific release (v1.0.0.1, snapshot of v1.0.0):**
+
+> Cleynen A, Ravindran A, Shirokikh NE (2026). *Arnaroo/FracFixR: FracFixR v1.0.0.1 — archival re-publish.* Zenodo. https://doi.org/10.5281/zenodo.20234584
+
+**Accompanying manuscript:**
+
+> Cleynen A, Ravindran A, Shirokikh N (2025). FracFixR: A compositional
+> statistical framework for absolute proportion estimation between fractions
 
 ## Contact
 
