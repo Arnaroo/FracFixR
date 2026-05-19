@@ -1,4 +1,4 @@
-# FracFixD installer / packaging templates
+# FracFixD installer / packaging scripts
 
 This directory holds the per-platform packaging scripts and
 installer source files for FracFixD.  They are released under
@@ -7,28 +7,28 @@ downstream redistributions.
 
 | File | Purpose | Status (v2.0.0) |
 |---|---|---|
-| `package-linux.sh` | Linux strip + sha256 + staging script | Stub — see `../docs/BUILD_LINUX.md` for the canonical workflow |
-| `package-macos.sh` | macOS dylib-bundle + `.app` + `.dmg` builder | Template — adapt from TagGen v1.2.5 `installer/package-macos.sh` |
-| `applauncher.c`    | Native Mach-O launcher for the `.app` bundle (Tahoe-Gatekeeper-compatible) | Template — adapt from TagGen v1.2.5 `installer/applauncher.c` |
-| `package-windows.sh` | MSYS2 + DLL-collection + ZIP builder | Template — adapt from TagGen v1.2.5 `installer/package-windows.sh` |
-| `build-windows.bat` | All-in-one Windows build + ZIP + (optional) Inno Setup driver | Template — adapt from TagGen v1.2.5 `build-windows.bat` |
-| `fracfixd-installer.iss` | Inno Setup script (creates `.exe` installer) | Template — adapt from TagGen v1.2.5 `installer/taggen-installer.iss` |
+| `package-linux.sh` | Linux strip + sha256 + staging script | **Active** — used to stage the four Linux binaries shipped in `../bin/` |
+| `package-macos.sh` | macOS dylib-bundle + `.app` + `.dmg` builder | **Active** — produced `FracFixD-2.0.0-macos-arm64.dmg` shipped in `../bin/` |
+| `applauncher.c`    | Native Mach-O launcher for the `.app` bundle (Tahoe-Gatekeeper-compatible) | **Active** — compiled in by `package-macos.sh` |
+| `package-windows.sh` | MSYS2 + DLL-collection + ZIP builder | **Active** — invoked by `build-windows.bat` |
+| `build-windows.bat` | All-in-one Windows build + ZIP + (optional) Inno Setup driver | **Active** — see `../docs/BUILD_WINDOWS.md` for step-by-step instructions |
+| `fracfixd-installer.iss` | Inno Setup script (creates `.exe` installer) | **Active** — invoked when `build-windows.bat --installer` is passed |
 
-For **v2.0.0 "Quokka"** the Linux release is the only platform
-shipped pre-built.  macOS and Windows scaffolds in this
-directory are provided as a starting point for follow-up
-releases (and for source-tree licensees who want to produce
-their own builds today).
+For the **canonical build walk-throughs** see:
 
-The complete TagGen v1.2.5 reference implementations are at
-`https://github.com/Arnaroo/taggen` (specifically the
-`installer/` directory and `build-windows.bat`).  Adapting
-them to FracFixD is mechanical: change `taggen` → `fracfixd`,
-update the version string, switch the resource filenames, and
-keep the dylib/DLL collection logic untouched.
+- [`../docs/BUILD_LINUX.md`](../docs/BUILD_LINUX.md) — produces
+  three microarch-tuned Linux binaries plus a static CLI variant.
+- [`../docs/BUILD_MACOS.md`](../docs/BUILD_MACOS.md) —
+  macincloud-verified end-to-end recipe; produces a relocatable
+  bundle, an `.app`, and a `.dmg`.
+- [`../docs/BUILD_WINDOWS.md`](../docs/BUILD_WINDOWS.md) —
+  step-by-step recipe for licensed source-tree recipients;
+  produces a portable ZIP and an Inno Setup `.exe`.
 
-For the canonical build walk-throughs see:
-
-- [`../docs/BUILD_LINUX.md`](../docs/BUILD_LINUX.md)
-- [`../docs/BUILD_MACOS.md`](../docs/BUILD_MACOS.md)
-- [`../docs/BUILD_WINDOWS.md`](../docs/BUILD_WINDOWS.md)
+These scripts were adapted from the TagGen v1.2.5 release
+pipeline (`https://github.com/Arnaroo/taggen`) — the macOS
+script gained a `LC_RPATH` dedupe step (needed because OpenBLAS
+pulls in many transitive dylibs that `dylibbundler` processes
+multiple times), the Windows scripts grew explicit OpenBLAS /
+LAPACK / gfortran DLL lists, and `applauncher.c` is reused
+verbatim.

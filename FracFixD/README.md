@@ -17,8 +17,8 @@
 <p align="center">
   <a href="https://github.com/Arnaroo/FracFixR/releases"><img src="https://img.shields.io/badge/release-v2.0.0%20Quokka-blue" alt="release"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/binaries-CC--BY--NC--ND--4.0-lightgrey" alt="binaries licence"></a>
-  <img src="https://img.shields.io/badge/platforms-Linux%20x86__64-orange" alt="platforms">
-  <img src="https://img.shields.io/badge/macOS%20%7C%20Windows-planned-yellow" alt="planned platforms">
+  <img src="https://img.shields.io/badge/platforms-Linux%20x86__64%20%7C%20macOS%20arm64-orange" alt="platforms">
+  <img src="https://img.shields.io/badge/Windows%20x86__64-source%20build-yellow" alt="Windows status">
 </p>
 
 ---
@@ -261,16 +261,47 @@ The CLI mode does not require GTK — `fracfixd --cli` and
 `fracfixd-cli-linux-x86_64-static` run on headless hosts with
 no GUI libraries installed at all.
 
-### macOS and Windows
+### macOS (arm64)
 
-Binaries for **macOS arm64** and **Windows x86_64** are planned
-for follow-up releases.  Source-build instructions for both
-platforms are shipped in [`docs/BUILD_MACOS.md`](docs/BUILD_MACOS.md)
-and [`docs/BUILD_WINDOWS.md`](docs/BUILD_WINDOWS.md) so adventurous
-users can build them today.  The D source code is held
-privately; these documents cover the toolchain, dependencies,
-and packaging recipe — the source-tree access is by request
-(see [*Source code*](#source-code)).
+A native arm64 `.dmg` is shipped alongside the Linux binaries:
+
+```bash
+# Download the .dmg
+curl -fsSL https://github.com/Arnaroo/FracFixR/raw/master/FracFixD/bin/FracFixD-2.0.0-macos-arm64.dmg \
+     -o FracFixD-2.0.0-macos-arm64.dmg
+
+# Verify (compare against SHA256SUMS)
+shasum -a 256 FracFixD-2.0.0-macos-arm64.dmg
+
+# Mount + install
+open FracFixD-2.0.0-macos-arm64.dmg
+# Drag FracFixD.app into the Applications symlink.
+```
+
+First launch: right-click `FracFixD.app` → Open to clear the
+one-time Gatekeeper confirmation (the binary is ad-hoc signed,
+not Developer-ID notarised).  Or clear the quarantine flag from
+Terminal:
+
+```bash
+xattr -dr com.apple.quarantine /Applications/FracFixD.app
+```
+
+For CLI / pipeline use, a relocatable tarball is also shipped:
+`fracfixd-2.0.0-macos-arm64.tar.gz`.  Extract and call
+`./fracfixd-macos/bin/fracfixd-launcher.sh --cli ...` from any
+location.
+
+### Windows (x86_64)
+
+A pre-built Windows binary is **planned** for a follow-up
+release.  Until it lands, users with access to the source tree
+can build their own following the step-by-step recipe in
+[`docs/BUILD_WINDOWS.md`](docs/BUILD_WINDOWS.md) — the same
+recipe produces both a portable ZIP and an Inno Setup `.exe`
+installer with all GTK 3 + OpenBLAS / LAPACK / gfortran DLLs
+bundled.  Source-tree access is by request (see
+[*Source code*](#source-code)).
 
 ---
 
@@ -347,9 +378,9 @@ FDR, shrinkage, permutation, QC, output formatting, logging).
 These are documented up front so you can decide whether v2.0.0
 fits your workflow.
 
-- **Linux x86_64 only.**  macOS arm64 and Windows x86_64
-  builds are planned for follow-up releases; build instructions
-  are shipped but binaries are not.
+- **Linux x86_64 and macOS arm64 only.**  Windows x86_64
+  binary is planned for a follow-up release; build instructions
+  are shipped today and Seva is producing the binary.
 - **GUI is Linux-only this release.**  CLI mode works on every
   platform the binaries are built for; the GTK3 GUI only ships
   for Linux in v2.0.0.

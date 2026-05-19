@@ -1,240 +1,353 @@
-# Building FracFixD on Windows (x86_64)
+# Building FracFixD on Windows (x86_64) — step-by-step
 
 > **NOTE.** The FracFixD source code is closed and confidential
 > (see [`../README.md` → Source code](../README.md#source-code)).
-> This document describes the **Windows build recipe** as a
-> provenance reference and for licensed source-tree recipients.
-> A pre-built Windows x86_64 binary is **planned** for a
-> follow-up release; until it lands, this walk-through is the
-> path for source-tree users.
+> This document is the **step-by-step Windows build recipe** for
+> licensed source-tree recipients (Seva and others).  Following
+> the steps below produces both a portable ZIP and an Inno Setup
+> `.exe` installer with all GTK 3 + OpenBLAS / LAPACK / gfortran
+> DLLs bundled.
+>
+> If you do not have access to the source tree, download the
+> pre-built Linux / macOS binaries from
+> [`../bin/`](../bin/) and skip this document.
 
-The recipe below mirrors the TagGen v1.2.5 Windows release
-process.
+The build is a single end-to-end script — [`../installer/build-windows.bat`](../installer/build-windows.bat)
+— that handles everything: prerequisites check, DUB build, DLL
+collection (via the MSYS2-side [`../installer/package-windows.sh`](../installer/package-windows.sh)
+helper), GdkPixbuf-loader / GTK-theme staging, portable ZIP
+creation, and optional Inno Setup `.exe` installer compilation.
 
 ---
 
-## 1. Prerequisites
+## Step 1 — Install one-time prerequisites
 
-### Hardware
+You only need to do this once per machine.
 
-- 64-bit Windows 10 or Windows 11.
-- At least 4 GB RAM, 10 GB disk for the build environment.
+### 1.1 MSYS2 + GTK 3 + OpenBLAS + LAPACK
 
-### Toolchain
-
-Install the following, in this order:
-
-#### 1.1 MSYS2 (for GTK 3 + dependencies)
-
-Download from https://www.msys2.org/ and run the installer.
-Once installed, open the **MSYS2 MINGW64** shell and:
+1. Download MSYS2 from **https://www.msys2.org/** and run the
+   installer.  Accept the default install path (`C:\msys64`).
+2. Open the **"MSYS2 MINGW64"** shortcut from the Start Menu
+   (NOT the plain "MSYS2 MSYS" — they're different).
+3. In the MINGW64 terminal, run:
 
 ```bash
 pacman -Syu                                    # initial sync; close + reopen shell after
 pacman -Syu                                    # second pass
 pacman -S mingw-w64-x86_64-gtk3 \
+          mingw-w64-x86_64-openblas \
+          mingw-w64-x86_64-lapack \
           mingw-w64-x86_64-pkg-config \
           mingw-w64-x86_64-gcc \
           mingw-w64-x86_64-binutils \
-          unzip wget
+          unzip wget zip
 ```
 
-GTK 3 should now be at `C:\msys64\mingw64\bin\` (around 70
-DLLs).
+Verify GTK 3 and OpenBLAS are installed:
 
-#### 1.2 Visual Studio Build Tools (for the MSVC linker)
+```bash
+ls /mingw64/bin/libgtk-3-0.dll          # should exist (~10 MB)
+ls /mingw64/bin/libopenblas.dll          # should exist (~50 MB)
+ls /mingw64/bin/liblapack.dll            # should exist
+```
+
+If any are missing, re-run `pacman -S` for that package.
+
+### 1.2 Visual Studio Build Tools
 
 LDC's `-mtriple=x86_64-windows-msvc` requires the MSVC linker.
 
-1. Download Visual Studio 2022 Build Tools from
-   https://visualstudio.microsoft.com/downloads/.
-2. Install the **"Desktop development with C++"** workload.
-3. Confirm `link.exe` is on PATH from the **x64 Native Tools
-   Command Prompt for VS 2022**.
-
-#### 1.3 LDC 1.42 (Windows release)
+1. Download **Visual Studio 2022 Build Tools** from
+   https://visualstudio.microsoft.com/visual-cpp-build-tools/.
+2. Run the installer and select the **"Desktop development with
+   C++"** workload.  The default-checked sub-components are fine.
+3. After install, confirm by opening
+   **"x64 Native Tools Command Prompt for VS 2022"** from the
+   Start Menu and running:
 
 ```cmd
-:: Download LDC 1.42.0-windows-x64.7z from
-::   https://github.com/ldc-developers/ldc/releases
-:: Extract to C:\D\ldc2
+cl
+```
 
+You should see `Microsoft (R) C/C++ Optimizing Compiler Version ...`.
+If you see "command not found" you opened the wrong terminal.
+
+### 1.3 LDC2 D compiler
+
+1. Download `ldc2-1.42.0-windows-multilib.7z` (or newer) from
+   https://github.com/ldc-developers/ldc/releases.
+2. Extract to `C:\D\ldc2` so that `C:\D\ldc2\bin\ldc2.exe` exists.
+   (The build script also searches `C:\D\ldc2-*\bin\`.)
+3. Verify by opening the **x64 Native Tools Command Prompt** and
+   running:
+
+```cmd
 set PATH=%PATH%;C:\D\ldc2\bin
 ldc2 --version
 ```
 
-#### 1.4 Inno Setup 6 (optional, for the `.exe` installer)
+You should see `LDC - the LLVM D compiler (1.42.0): ...`.
 
-Download from https://jrsoftware.org/isinfo.php.  Default
-install location is `C:\Program Files (x86)\Inno Setup 6\`.
+### 1.4 Inno Setup 6 (optional — only for `.exe` installer)
 
----
+If you only need the portable ZIP, skip this step.
 
-## 2. Source-tree access
+```cmd
+winget install JRSoftware.InnoSetup
+```
 
-See [`../README.md` → Source code](../README.md#source-code).
-The build commands below assume you have the source tree
-checked out and that `dub.json` ships the `windows`
-configuration (it does in the public-release v2.0.0 tree).
-
-Open the **x64 Native Tools Command Prompt for VS 2022** and
-`cd` to the source-tree root.
+Or download from https://jrsoftware.org/isinfo.php and run the
+default installer.  Default install path is
+`C:\Program Files (x86)\Inno Setup 6\`.
 
 ---
 
-## 3. Build the executable
+## Step 2 — Get the FracFixD source
+
+The source tree is closed and provided under a separate licence
+agreement.  Once you have the tree (typically as a tarball or
+git bundle), extract it to a convenient location:
+
+```cmd
+cd C:\Repos
+:: Extract the source-tree archive here
+:: Result:  C:\Repos\FracFixD\dub.json
+:: Result:  C:\Repos\FracFixD\source\...
+:: Result:  C:\Repos\FracFixD\installer\
+```
+
+The directory structure should look like:
+
+```
+C:\Repos\FracFixD\
++-- dub.json
++-- dub.selections.json
++-- source\
+|   +-- app.d
+|   +-- cli.d
+|   +-- version_.d
+|   +-- gui_main.d
+|   +-- gui_worker.d
+|   +-- gui_state.d
+|   +-- embedded_resources.d
+|   +-- fracfix\
++-- resources\
+|   +-- logo.svg
+|   +-- logo-256.png
+|   +-- ...
++-- installer\
+|   +-- build-windows.bat
+|   +-- package-windows.sh
+|   +-- fracfixd-installer.iss
+|   +-- package-macos.sh
+|   +-- applauncher.c
++-- ...
+```
+
+---
+
+## Step 3 — Run the build
+
+1. Open **"x64 Native Tools Command Prompt for VS 2022"** from
+   the Start Menu.  This is critical — a regular `cmd.exe` will
+   not have the MSVC linker on `PATH`.
+2. `cd` to the source-tree root:
+
+```cmd
+cd C:\Repos\FracFixD
+```
+
+3. (Optional) Add LDC to `PATH` if not already done in your user
+   environment:
 
 ```cmd
 set PATH=%PATH%;C:\D\ldc2\bin
-
-:: Default Windows config is CLI-only (no GTK at compile time).
-:: For the GUI build use the macos-style config adapted for win,
-:: which is wired up in `windows-gui` (custom; see source-tree dub.json).
-
-dub build --config=windows --build=release-static --compiler=ldc2 --force
-
-:: Produces fracfixd-cli.exe (~4 MB)
-:: For the GUI build:
-dub build --config=windows-gui --build=release-static --compiler=ldc2 --force
-:: Produces fracfixd.exe (~5 MB; needs GTK 3 DLLs at runtime)
 ```
 
-For the GUI binary, LDC must target the MSVC ABI:
+4. Run the build script:
 
-```json
-"dflags-ldc": ["-mtriple=x86_64-windows-msvc"]
+```cmd
+installer\build-windows.bat
 ```
 
-(This is already present in the `windows` and `windows-gui`
-configurations.)
+The script will:
+
+- **Step 0/6**: Check prerequisites (MSVC, LDC, DUB, MSYS2 + GTK3
+  + OpenBLAS, Inno Setup if `--installer` was passed).
+- **Step 1/6**: Run `dub build --config=windows-gui --build=release-static
+  --compiler=ldc2 --force` to produce `fracfixd.exe`.
+- **Step 2/6**: Stage `fracfixd.exe` in `dist\fracfixd-windows\`.
+- **Step 3/6**: Delegate to `installer\package-windows.sh` (running
+  inside MSYS2 MINGW64) which walks `ldd` over the binary and
+  GTK / OpenBLAS roots to collect ~70-80 DLLs.  Copies them all
+  into `dist\fracfixd-windows\` alongside the executable.
+- **Step 4/6**: Copy GdkPixbuf loaders, GTK Default + MS-Windows
+  themes, Adwaita icon theme, GLib schemas — everything GTK 3
+  needs at runtime — into `dist\fracfixd-windows\lib\` and
+  `dist\fracfixd-windows\share\`.
+- **Step 5/6**: Wrap the whole staging tree in a portable ZIP:
+  `dist\fracfixd-v2.0.0-windows-x86_64.zip` (~40 MB).
+- **Step 6/6**: (skipped without `--installer`).
+
+Expected output on success:
+
+```
+============================================================
+ BUILD COMPLETE
+============================================================
+
+  Output files in dist\:
+
+    fracfixd.exe                                  6500000 bytes
+    fracfixd-v2.0.0-windows-x86_64.zip            38000000 bytes
+
+  Staging directory: dist\fracfixd-windows\
+
+  To test the build:
+    dist\fracfixd-windows\fracfixd.exe                  [GTK + BLAS DLLs bundled in this dir]
+    dist\fracfixd-windows\fracfixd.exe --cli --version
+```
 
 ---
 
-## 4. Run `build-windows.bat`
+## Step 4 — Build the `.exe` installer (optional)
 
-The in-tree all-in-one builder script
-[`../installer/build-windows.bat`](../installer/build-windows.bat)
-wraps prerequisite checks + DUB build + GTK-DLL collection +
-optional Inno Setup invocation:
+If Inno Setup 6 is installed, re-run with `--installer`:
 
 ```cmd
-cd FracFixD\installer
-build-windows.bat                  :: Build + portable ZIP
-build-windows.bat --installer      :: Build + ZIP + Inno Setup .exe
+installer\build-windows.bat --installer
 ```
 
-The script's logical steps:
+This re-runs the build (or `--skip-build` to reuse the existing
+`fracfixd.exe` if you don't want to recompile) and then calls
+`iscc.exe` on `installer\fracfixd-installer.iss` to produce:
 
-1. Locate LDC on PATH (search `C:\D\ldc2\bin\` if not found).
-2. Run `dub build --config=windows-gui --build=release-static
-   --compiler=ldc2 --force` (or `--config=windows` for the
-   CLI-only build).
-3. Stage the executable in `dist\fracfixd-windows\`.
-4. Walk `ldd` (msys2's `ntldd` is the equivalent) on
-   `fracfixd.exe` and copy every DLL transitively required
-   into `dist\fracfixd-windows\`.  Around 70 DLLs end up here
-   (GTK 3, GLib, GObject, GIO, Pango, Cairo, GdkPixbuf,
-   HarfBuzz, FreeType, libintl, libpcre, fontconfig, etc.).
-5. Copy GdkPixbuf loaders to
-   `dist\fracfixd-windows\lib\gdk-pixbuf-2.0\2.10.0\` and
-   patch `loaders.cache` to use relative paths.
-6. Copy GTK 3 themes (Adwaita), Adwaita icon theme, GLib
-   schemas.
-7. Drop `README.md`, `LICENSE` into the staging dir.
-8. ZIP the staging dir:
-   `fracfixd-v2.0.0-windows-x86_64.zip` (~30-40 MB).
-9. If `--installer` was passed, invoke Inno Setup on
-   `installer\fracfixd-installer.iss` to produce
-   `FracFixD-2.0.0-windows-x86_64-setup.exe` (~25 MB).
+```
+dist\FracFixD-2.0.0-windows-x86_64-setup.exe         (~30 MB)
+```
+
+End-user experience: double-click `.exe`, accept the licence,
+choose install location (default `C:\Program Files\FracFixD`),
+optionally tick "add to PATH" and "create desktop shortcut",
+click Install.  The installer writes an uninstaller entry under
+"Add or Remove Programs".
 
 ---
 
-## 5. Inno Setup installer (optional)
+## Step 5 — Verify the build
 
-The shipped script
-[`../installer/fracfixd-installer.iss`](../installer/fracfixd-installer.iss)
-declares:
-
-```iss
-[Setup]
-AppName=FracFixD
-AppVersion=2.0.0
-AppPublisher=Arnaroo Ribologicals
-AppPublisherURL=https://github.com/Arnaroo/FracFixR
-DefaultDirName={autopf}\FracFixD
-DefaultGroupName=FracFixD
-LicenseFile=..\LICENSE
-OutputBaseFilename=FracFixD-2.0.0-windows-x86_64-setup
-SetupIconFile=..\resources\fracfixd-icon.ico
-Compression=lzma2
-SolidCompression=yes
-
-[Files]
-Source: "..\..\dist\fracfixd-windows\*"; DestDir: "{app}"; Flags: recursesubdirs
-
-[Icons]
-Name: "{group}\FracFixD"; Filename: "{app}\fracfixd.exe"
-Name: "{commondesktop}\FracFixD"; Filename: "{app}\fracfixd.exe"; Tasks: desktopicon
-
-[Tasks]
-Name: desktopicon; Description: "Create a desktop shortcut"; GroupDescription: "Optional:"
-Name: addtopath;  Description: "Add to system PATH";          GroupDescription: "Optional:"
-
-[Code]
-{ ... PATH modification helpers ... }
-```
-
-Build with Inno Setup's `iscc.exe`:
+From the same Command Prompt (still in source root):
 
 ```cmd
-"C:\Program Files (x86)\Inno Setup 6\iscc.exe" installer\fracfixd-installer.iss
-```
+:: GUI smoke (launches the GTK3 window)
+dist\fracfixd-windows\fracfixd.exe
 
-Output: `FracFixD-2.0.0-windows-x86_64-setup.exe`.
-
----
-
-## 6. Verification
-
-```cmd
-:: Smoke test
-dist\fracfixd-windows\fracfixd.exe --version
+:: CLI smoke (no GUI — uses --cli short-circuit)
+dist\fracfixd-windows\fracfixd.exe --cli --version
 dist\fracfixd-windows\fracfixd.exe --cli help diffprop
 
-:: Hash the artefacts (PowerShell)
-Get-FileHash dist\fracfixd-v2.0.0-windows-x86_64.zip -Algorithm SHA256
-Get-FileHash FracFixD-2.0.0-windows-x86_64-setup.exe -Algorithm SHA256
+:: SHA-256 hash for the release-notes SHA256SUMS file
+powershell -NoProfile -Command "Get-FileHash dist\fracfixd-v2.0.0-windows-x86_64.zip -Algorithm SHA256"
+powershell -NoProfile -Command "Get-FileHash dist\FracFixD-2.0.0-windows-x86_64-setup.exe -Algorithm SHA256"
 ```
 
-End-user experience for the ZIP: extract the folder anywhere,
-double-click `fracfixd.exe`.  For the installer: run the
-`.exe`, accept the license, optionally add to PATH and create
-a desktop shortcut.
+The `--version` output should display the banner:
+
+```
++----------------------------------------------------------------+
+|   Version:   2.0.0                                             |
+|   Codename:  Quokka                                            |
+|   Status:    Stable                                            |
++----------------------------------------------------------------+
+```
 
 ---
 
-## 7. Known Windows-specific issues
+## Step 6 — Ship the artefacts
 
-- **Console window appears alongside the GUI** — by default
-  LDC produces console-subsystem executables.  Add
-  `-Wl,/SUBSYSTEM:WINDOWS` to suppress the console for the
-  GUI variant (a no-console build is planned; v2.0.0 uses the
-  console-subsystem default to keep the build script
-  simple).
-- **"`vcruntime140.dll` not found"** — install the Visual C++
-  Redistributable 2015-2022 from Microsoft.  Most users
-  already have it.
-- **Defender SmartScreen warning on first launch** — the
-  unsigned `.exe` triggers a one-time SmartScreen confirmation.
-  Code signing is not yet in scope for v2.0.0.
-- **GTK 3 theme appears wrong** — confirm Adwaita theme and
-  schemas were copied to `lib\share\` in the staging dir.  The
-  installer script handles this automatically; manual builds
-  may forget the `share\glib-2.0\schemas\` directory.
+Send Nick (or whoever is collating the release):
+
+1. `dist\fracfixd-v2.0.0-windows-x86_64.zip`
+2. `dist\FracFixD-2.0.0-windows-x86_64-setup.exe` (if you ran
+   `--installer`)
+3. The two SHA-256 hashes from Step 5.
+
+They will land in `FracFixD/bin/` of the release repo alongside
+the existing Linux + macOS artefacts.
 
 ---
 
-## 8. Build-host snapshot (for full reproducibility)
+## Troubleshooting
+
+### `ldc2: command not found`
+
+LDC is not on `PATH`.  Either:
+
+- Set it for the session: `set PATH=%PATH%;C:\D\ldc2\bin`
+- Or set it permanently: Control Panel → System → Advanced
+  → Environment Variables → User PATH → Edit → New →
+  `C:\D\ldc2\bin`.
+
+### `cl: command not found`
+
+You opened a regular `cmd.exe` instead of the **"x64 Native
+Tools Command Prompt for VS 2022"**.  Close and reopen from
+the correct Start Menu shortcut.
+
+### `BUILD FAILED ... linker error openblas`
+
+OpenBLAS is not installed in MSYS2.  In an MSYS2 MINGW64
+terminal:
+
+```bash
+pacman -S mingw-w64-x86_64-openblas mingw-w64-x86_64-lapack
+```
+
+Then re-run `installer\build-windows.bat`.
+
+### `No DLLs were collected`
+
+The MSYS2-side helper (`package-windows.sh`) couldn't find GTK 3
+in `/mingw64/bin/`.  Either:
+
+- MSYS2 isn't installed at the default `C:\msys64` — edit
+  `installer\build-windows.bat` and change the `MSYS2_ROOT`
+  variable.
+- GTK 3 is missing — install via
+  `pacman -S mingw-w64-x86_64-gtk3` from the MINGW64 terminal.
+
+### `Defender SmartScreen warning on first launch`
+
+The unsigned `.exe` triggers a one-time SmartScreen confirmation.
+Click "More info" → "Run anyway".  Code signing requires an
+Authenticode certificate and is outside the v2.0.0 scope.
+
+### `vcruntime140.dll not found` on end-user machine
+
+The end user is missing the Visual C++ Redistributable 2015-2022
+runtime.  They can install it from
+https://aka.ms/vs/17/release/vc_redist.x64.exe (free download).
+Most Windows installs have it already; this only affects very
+clean systems.
+
+### `Build succeeds but DLL count < 50`
+
+Run `installer\package-windows.sh` manually from an MSYS2 MINGW64
+terminal so you can see all the `ldd` warnings:
+
+```bash
+cd /c/Repos/FracFixD
+./installer/package-windows.sh
+```
+
+Likely cause: a transitive dependency in the `ROOT_DLLS` or
+`EXTRA_DLLS` lists couldn't be found.  Add the missing DLL to
+the `EXTRA_DLLS` array in `package-windows.sh` and rerun.
+
+---
+
+## Reference: build-host snapshot
 
 The reference Windows build host used during the v2.0.0
 release-engineering cycle:
@@ -242,12 +355,14 @@ release-engineering cycle:
 | Component | Version |
 |---|---|
 | Windows | 11 (build 22631) |
-| MSYS2 | 2026-01-12 release |
-| GTK 3 (mingw-w64) | 3.24.43 |
+| MSYS2 | 2026-01 rolling release |
+| GTK 3 (mingw-w64) | 3.24.43+ |
+| OpenBLAS (mingw-w64) | 0.3.28+ |
+| LAPACK (mingw-w64) | 3.12.0+ |
+| Visual Studio Build Tools | 2022 v17.10+ |
 | LDC | 1.42.0 |
-| Visual Studio Build Tools | 2022 v17.10 |
-| Inno Setup | 6.3.3 |
+| Inno Setup | 6.3.3+ |
 
-A future release MAY ship a CI workflow (`.github/workflows/`)
-that automates this on GitHub Actions; for v2.0.0 the build is
-manual on a Windows host.
+Building on older MSYS2 / GTK versions should work but is
+untested.  If you hit a compatibility issue let Nick know
+which versions you're running.
