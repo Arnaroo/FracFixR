@@ -1,10 +1,10 @@
-# FracFixD: a native-D rewrite of FracFixR — fast compositional fractional fixup and differential proportion testing for RNA fractionation data
+# FracFixD: a native-D rewrite of FracFixR providing a fast compositional fractional fixup and differential proportion testing for RNA fractionation data
 
 > **A native-D, single-binary, GUI-and-CLI compositional statistics
 > tool for fractionated RNA sequencing assays, built from the ground
 > up for *pipeline-scale* throughput.**
 > Run the same NNLS-based fraction recovery and beta-binomial
-> differential-proportion testing as FracFixR — but as a single
+> differential-proportion testing as FracFixR, but as a single
 > portable executable that processes 100k-transcript experiments in
 > seconds, integrates as a Snakemake / Nextflow step without an R
 > install, and ships a GTK3 GUI for interactive exploration when you
@@ -32,8 +32,7 @@ experiments (polysome profiling, subcellular fractionation,
 RNA-protein complex isolation, any assay that splits one sample
 into several library-prepped fractions).  Where FracFixR is the
 canonical, open-source, R-native reference, FracFixD is the same
-mathematics — re-implemented in D for native parallel throughput
-— packaged as a single self-contained executable.
+mathematics re-implemented in D for native parallel throughput and packaged as a single self-contained executable.
 
 FracFixD targets four audiences that an R-only release serves
 less well:
@@ -84,7 +83,7 @@ for you.
 | **Self-contained static CLI** | The `fracfixd-cli-linux-x86_64-static` artefact links the D runtime statically and depends only on libc + libblas at runtime.  1.9 MB.  Perfect for container images and HPC node-locals. |
 | **Caching pipeline** | `fracfix --cache-fits FILE.cache` saves the per-replicate NNLS fits + proportions matrix; `diffprop --from-cache FILE.cache` skips the entire fixup step.  Same statistical output, ~10× faster re-runs when you only need to vary the diff-prop knobs. |
 | **Native binary proportions format** | `--out-proportions-bin FILE.bin` writes the FFXD1BIN packed-double format; `diffprop --norm FILE.bin` parses it ~30× faster than the equivalent TSV. |
-| **Deterministic step rule for SIMD reproducibility** | `--bb-step-rule deterministic` opts the beta-binomial fitter into a basin-desensitised L-BFGS-B variant with pure-double special functions — reproducible across CPU microarchitectures and SIMD widths. |
+| **Deterministic step rule for SIMD reproducibility** | `--bb-step-rule deterministic` opts the beta-binomial fitter into a basin-desensitised L-BFGS-B variant with pure-double special functions, reproducible across CPU microarchitectures and SIMD widths. |
 | **Native SVG volcano plots** | `fracfixd plot --diff FILE --out FILE.svg` renders a publication-grade volcano in SVG 1.1 (renderer-stable across librsvg, Inkscape, Firefox).  Optional `--r-script FILE.R` emits an EnhancedVolcano-style ggplot reproduction script. |
 | **Compositional QC built-in** | `--qc on|strict` runs intercept-stability + per-replicate κ(X) checks before the fits commit; `--qc-report FILE` writes a TSV diagnostic alongside the proportions. |
 | **No telemetry, no cloud, no account** | FracFixD is a desktop / CLI application.  It does not phone home.  All inputs and outputs are local files. |
@@ -101,16 +100,16 @@ below for the numerical-agreement contract.
 
 ### Subcommands
 
-- **`fracfixd fracfix`** — compositional fixup (proportions
+- **`fracfixd fracfix:`**  compositional fixup (proportions
   recovery + lost-fraction estimation).  Produces a self-
   describing proportions TSV / `.bin` you can hand to any
   downstream tool.
-- **`fracfixd diffprop`** — differential-proportion testing
+- **`fracfixd diffprop:`** differential-proportion testing
   between two or more conditions, with the full battery of
   asymptotic and permutation tests.
-- **`fracfixd plot`** — volcano SVG renderer with optional R
+- **`fracfixd plot:`** volcano SVG renderer with optional R
   reproduction script.
-- **`fracfixd help [SUBCOMMAND]`** — detailed per-subcommand help
+- **`fracfixd help [SUBCOMMAND]:`** detailed per-subcommand help
   and changelog.
 
 ### Statistical tests (`--test`)
@@ -150,9 +149,9 @@ Optional independent filtering (`--filter-by mean|count
 
 ### Robust NNLS (`--nnls`)
 
-`plain` (default; v1.5.x bit-identical reference) · `ridge`
-(L₂-regularised; `--ridge-lambda`) · `auto` (κ(X)-triggered
-fallback; `--nnls-auto-trigger`).
+`plain` (default) · `ridge` (L₂-regularised;
+`--ridge-lambda`) · `auto` (κ(X)-triggered fallback;
+`--nnls-auto-trigger`).
 
 ### Permutation p-values (`--permutation`)
 
@@ -202,8 +201,7 @@ in-tree equivalence harness:
 - **`--bb-step-rule deterministic`**: experimental opt-in mode
   (basin-desensitised L-BFGS-B + pure-double special
   functions).  Reproducible across CPU microarchitectures and
-  SIMD widths; classic mode (default) is bit-identical to
-  v1.5.x.
+  SIMD widths; classic mode is the default and is unchanged.
 
 The reference R outputs are produced from a fresh
 `devtools::install_github("Arnaroo/FracFixR/CRAN")` per equivalence
@@ -336,7 +334,7 @@ fracfixd plot \
 maps each sample column to its `(Condition, Replicate, Fraction)`
 triplet.  Both formats are documented under `fracfixd help fracfix`.
 
-Multi-condition global LRT with per-pair contrasts (Session 22+):
+Multi-condition global LRT with per-pair contrasts:
 
 ```bash
 fracfixd diffprop \
@@ -368,7 +366,7 @@ fracfixd-cli diffprop \
 ```
 
 See `fracfixd help diffprop` for the full flag inventory
-(roughly 50 options grouped by purpose — testing, dispersion,
+(roughly 50 options grouped by purpose, including testing, dispersion,
 FDR, shrinkage, permutation, QC, output formatting, logging).
 
 ---
@@ -386,17 +384,17 @@ fits your workflow.
   for Linux in v2.0.0.
 - **`--bb-step-rule deterministic` ships EXPERIMENTAL.**  On the
   N=1000 dev fixture it reaches log₂FC Spearman 0.98 (vs the
-  classic 0.99+ target) — the residual gap is a small number of
+  classic 0.99+ target), the residual gap is a small number of
   φ-boundary transcripts where the deterministic kernel finds a
   legitimately different (often better) MLE than classic.
-  Default classic mode is bit-identical to v1.5.x.
+  Default classic mode is the recommended setting.
 - **Runtime dependencies** are the system OpenBLAS / LAPACK /
   gfortran / GTK3.  Available on every standard Linux install
   with R, scientific Python, or GNU Octave already present.
   The static CLI variant drops the LAPACK / GTK3 deps.
 - **No Hi-C / multi-omic extensions.**  FracFixD is single-purpose:
   compositional fractional fixup + differential-proportion
-  testing.  For genome-browser visualisation pair it with
+  testing.  For genome or transcriptome browser visualisation pair it with
   [VX](https://github.com/Arnaroo/VX); for full RNA-seq quant
   pair it with salmon / kallisto upstream.
 
@@ -487,18 +485,18 @@ snapshots.
 
 The complementary R package, **FracFixR**, has its own
 canonical citation in [`../CRAN/cran-comments.md`](../CRAN/cran-comments.md);
-when in doubt, cite both — the citations resolve to two
+when in doubt, cite both, the citations resolve to two
 different software artefacts that implement the same method.
 
 ---
 
 ## Build provenance
 
-For full transparency on how each release binary was produced —
+For full transparency on how each release binary was produced, 
 compiler version, microarchitecture targeting, LTO and bound-
 check flags, the D-runtime static-linking flow, the GTK3 / BLAS
 runtime dependency profile, and the SHA-256 verification
-recipe — see [`docs/BUILD_PROVENANCE.md`](docs/BUILD_PROVENANCE.md).
+recipe, see [`docs/BUILD_PROVENANCE.md`](docs/BUILD_PROVENANCE.md).
 
 For source-build walk-throughs on each platform (intended for
 users with access to the D source tree under a separate

@@ -196,8 +196,8 @@ re-builds should pin all three.
 
 The `--bb-step-rule deterministic` flag on the `diffprop`
 subcommand is the relevant *runtime* SIMD-reproducibility
-knob — it routes the beta-binomial fitter through a basin-
+knob: it routes the beta-binomial fitter through a basin-
 desensitised L-BFGS-B variant that produces the same MLE
 across CPU microarchitectures and SIMD widths.  Default
-classic mode is bit-identical to v1.5.x on a single
-machine.
+classic mode is deterministic on a single machine given a
+fixed binary.

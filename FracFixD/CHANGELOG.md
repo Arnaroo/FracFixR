@@ -1,114 +1,84 @@
-# FracFixD — User-facing Changelog
+# FracFixD User-facing Changelog
 
-This file records the **public-facing** release history of
-FracFixD.  Run `fracfixd --changelog` (or `--changelog-full`) for
-the detailed in-binary changelog with per-session deliverables.
+This file records the release history of FracFixD.  Run
+`fracfixd --changelog` for the same notes from the binary
+itself.
 
 ---
 
-## v2.0.0 "Quokka" — 2026-05-19
+## v2.0.0 "Quokka" 2026-05-19
 
 First public release.
 
 FracFixD ships as a binary-only subfolder inside the
 [`Arnaroo/FracFixR`](https://github.com/Arnaroo/FracFixR)
 umbrella repository, alongside the open-source FracFixR R
-package (CRAN-ready v1.1.0).
+package.
 
 ### Highlights
 
-- **Linux x86_64 release artefacts** (three microarchitecture-
-  tuned GUI+CLI binaries plus a static CLI variant):
+- **Linux x86_64 release artefacts**, three microarchitecture-
+  tuned GUI+CLI binaries plus a static CLI variant:
   - `fracfixd-linux-znver2-x86_64`     (AMD Zen 2 / 3 / 4)
   - `fracfixd-linux-broadwell-x86_64`  (Intel Broadwell or newer)
   - `fracfixd-linux-generic-x86_64`    (x86-64-v3 baseline)
   - `fracfixd-cli-linux-x86_64-static` (CLI only, no runtime deps
     beyond libc + libblas)
-- **Single binary, GUI + CLI** — no command-line flags → GTK3
-  GUI; `--cli` or any subcommand → headless console mode.
-- **Maximally optimised release builds** — `-O3 --flto=full
-  -boundscheck=off` with `--link-defaultlib-shared=false` to
-  statically link the D runtime.  Per-microarch `-mcpu=znver2 /
-  broadwell / x86-64-v3` tuning.
-- **macOS arm64 and Windows x86_64 builds planned** for
-  follow-up releases; source-build walk-throughs are shipped
-  today in `docs/BUILD_MACOS.md` and `docs/BUILD_WINDOWS.md`.
-
-### Method (carried forward from v1.5.x)
-
-The statistical method has been stable since v1.5.0 and is
-**not changed** for the public v2.0.0 cut.  Highlights:
-
-- **Compositional fixup** via per-replicate non-negative least
-  squares (`fracfix` subcommand): plain, ridge-penalised, and
-  κ(X)-triggered-auto variants.
-- **Differential-proportion testing** (`diffprop` subcommand)
-  with seven test backends — GLM-LRT (`glm`), binomial Wald
-  (`logit`), beta-binomial Wald (`wald`), Rao score (`score`),
-  HC0 / HC3 sandwich, and quasi-binomial.
-- **Multi-condition global tests** (`--multi-cond`) — LRT or
-  joint Wald χ² across K ≥ 2 conditions with optional per-pair
-  contrasts.
-- **Three dispersion modes** — `global`, `trend`, `per-transcript`
-  — with optional Bayesian shrinkage prior on log-φ
-  (`--phi-prior trended`, df controlled by `--phi-prior-df`).
-- **Three FDR procedures** — Benjamini-Hochberg, Benjamini-
-  Yekutieli, Storey single-λ q-values — with optional
-  independent filtering on a `mean` or `count` covariate.
-- **Three posterior-shrinkage estimators** — empirical-Bayes
-  Gaussian (`normal`), apeglm (Cauchy-prior posterior mode),
-  ashr (adaptive-shrinkage scale mixture).
-- **Permutation p-values** (`--permutation N`) with cluster-
-  friendly deterministic per-transcript seeding.
-- **Resumable pipeline** (`--cache-fits` / `--from-cache`) —
-  save FracFix fits once, reuse from any number of `diffprop`
-  invocations.
-- **Native FFXD1BIN proportions format** — ~30× faster than TSV
+- **macOS arm64 release artefacts**, a drag-to-Applications
+  `.dmg` plus a relocatable `.tar.gz` for CLI / pipeline use.
+  GTK 3, OpenBLAS and gfortran runtimes are bundled into the
+  `.app`; the launcher is a native Mach-O so Tahoe Gatekeeper
+  accepts it.
+- **Single binary, GUI + CLI**: no command-line flags launches
+  the GTK3 GUI; `--cli` or any subcommand drops into headless
+  console mode.
+- **Maximally optimised release builds** with `-O3 --flto=full
+  -boundscheck=off` and a statically-linked D runtime.  Per-
+  microarch `-mcpu=znver2 / broadwell / x86-64-v3` tuning.
+- **Comprehensive statistical surface**, carried forward
+  unchanged into the public release:
+  - NNLS compositional fixup (plain / ridge / auto).
+  - Seven differential-proportion test backends: GLM-LRT,
+    logit-Wald, beta-binomial Wald, Rao score, HC0 / HC3
+    sandwich, quasi-binomial.
+  - Multi-condition global LRT or joint Wald across K ≥ 2
+    conditions, optional per-pair contrasts.
+  - Three dispersion modes (global, trend, per-transcript) with
+    optional Bayesian shrinkage prior on log-φ.
+  - Three FDR procedures (BH, BY, Storey) with optional
+    independent filtering.
+  - Three posterior log₂FC shrinkage estimators (normal,
+    apeglm, ashr).
+  - Per-transcript permutation p-values with deterministic
+    seeding.
+- **Resumable pipeline** via `--cache-fits` / `--from-cache`,
+  save FracFix fits once and reuse them from any number of
+  `diffprop` invocations.
+- **Native FFXD1BIN proportions format**, ~30× faster than TSV
   to parse on 100k-transcript fixtures.
-- **Native SVG volcano plots** (`fracfixd plot`) with optional
-  EnhancedVolcano-style R reproduction script export.
+- **Native SVG volcano plots** with optional EnhancedVolcano-
+  style R reproduction script export.
+
+Windows x86_64 binary is planned for a follow-up release;
+source-build instructions are shipped in
+[`docs/BUILD_WINDOWS.md`](docs/BUILD_WINDOWS.md).
 
 ### Equivalence
 
 Default-flag output is verified against FracFixR on every
-release via the in-tree equivalence harness:
+release via an in-tree equivalence harness:
 
 - `--test glm` / `--test logit`: Spearman ρ(log₂FC) ≥ 0.99,
-  ρ(−log₁₀ p) ≥ 0.95.
-- `--test wald`: same Spearman targets; `|Δlog₁₀ p|` envelope
-  is 0.20 (the beta-binomial MLE has a wider convergence basin
-  than the GLM LRT route, so small drift in z-scores is
-  expected).
-- `--bb-step-rule deterministic` is **EXPERIMENTAL**: on the
-  N=1000 dev fixture it reaches log₂FC Spearman 0.98 vs
-  classic; the residual gap is a small number of φ-boundary
-  transcripts.  Default classic mode is unchanged.
+  ρ(−log₁₀ p) ≥ 0.95 on the standard synthetic fixtures.
+- `--test wald`: same Spearman targets; the `|Δlog₁₀ p|`
+  envelope is 0.20 because the beta-binomial MLE has a wider
+  convergence basin than the GLM LRT route.
 
 ### Notes
 
-- Version jump v1.5.4 → v2.0.0 marks the public-release
-  milestone.  No statistical-behaviour changes between v1.5.4
-  "Basin-Tighten" and v2.0.0 "Quokka" — purely a packaging /
-  version-bump cut.  Default-flag classic-mode output is
-  bit-identical to v1.5.4.
-- Binaries are released under **CC-BY-NC-ND-4.0**; D source is
-  closed and confidential.  For commercial licensing or
-  source-code access see [`README.md` → Source code](README.md#source-code).
-
----
-
-## Earlier development history
-
-The full per-session development history (35+ "sessions" from
-the initial scaffold in May 2026 through to v1.5.4 "Basin-
-Tighten") is embedded in the binary itself and accessible via:
-
-```bash
-fracfixd --changelog-full
-```
-
-This includes the v1.0.0 (Release-1.0), v1.1.x (Cache-Resume,
-Equivalence-Harness), v1.2.x (Shrinkage, Sandwich, Score),
-v1.3.x (FDR, Dispersion, Permutation), v1.4.x (Multi-condition,
-Contrasts), and v1.5.x (Bayes-CI, Robust-NNLS, Resume,
-Basin-SIMD, Basin-Tighten) pre-public-release milestones.
+- Binaries are released under **CC-BY-NC-ND-4.0**.  D source
+  code is closed and confidential; for commercial licensing or
+  source-tree access see [`README.md` → Source code](README.md#source-code).
+- The accompanying FracFixR R package (sibling [`../CRAN/`](../CRAN/))
+  is the canonical scientific reference and is released
+  open-source under CC BY 4.0.
