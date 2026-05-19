@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+    FracFixD logo — fractured-and-reassembled grid.
+
+    Visual analogue of the ASCII banner's motif: a 4x4 tile grid
+    whose lower-right 2x2 block has been displaced (fractured),
+    with the algorithm's correction shown by the "fix arrows" that
+    bring the displaced block back into the lattice.
+
+    Colour family: Biocodecs brand greens, neutral graphite outline.
+    Strict SVG 1.1 — no <foreignObject>, no SMIL, single <style> block.
+    Square 512 x 512 viewBox; design re-scales cleanly to any size.
+
+    (c) 2026 Biocodecs / Arnaroo Ribologicals / RMODEL.
+    License: CC-BY-NC-ND-4.0.
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 512 512"
+     width="512" height="512"
+     role="img"
+     aria-label="FracFixD logo — fractured and reassembled grid">
+
+  <title>FracFixD</title>
+  <desc>Four-by-four tile grid; the lower-right 2x2 sub-block is fractured (translated outward) and re-anchored by three short fix-arrows that point back into the lattice. Brand greens on a transparent background.</desc>
+
+  <defs>
+    <style type="text/css"><![CDATA[
+      .tile-anchor { fill: #1f6f4a; }
+      .tile-mid    { fill: #2e9c6c; }
+      .tile-frac   { fill: #7fd3a8; }
+      .tile-stroke { stroke: #14352a; stroke-width: 3; stroke-linejoin: miter; }
+      .fix-arrow   { stroke: #14352a; stroke-width: 6; fill: none; stroke-linecap: round; }
+      .frame       { stroke: #14352a; stroke-width: 4; fill: none; stroke-linejoin: miter; }
+    ]]></style>
+
+    <!-- Re-usable arrow head -->
+    <marker id="arrowhead" markerWidth="10" markerHeight="10"
+            refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,5 L0,10 Z" fill="#14352a"/>
+    </marker>
+  </defs>
+
+  <!-- Outer registration frame; light visual anchor only -->
+  <rect class="frame" x="32" y="32" width="448" height="448" rx="18" ry="18"/>
+
+  <!--
+      ANCHOR LATTICE
+      Top-left 2x2 (cells [0,0] [1,0] [0,1] [1,1]) and
+      the L-shape covering row 2 + column 2 (12 cells total).
+      Cell size 96, gap 8, origin (64, 64).
+  -->
+  <g class="tile-stroke">
+    <!-- Top-left 2x2: deepest brand green ("anchor") -->
+    <rect class="tile-anchor" x="64"  y="64"  width="96" height="96"/>
+    <rect class="tile-anchor" x="168" y="64"  width="96" height="96"/>
+    <rect class="tile-anchor" x="64"  y="168" width="96" height="96"/>
+    <rect class="tile-anchor" x="168" y="168" width="96" height="96"/>
+
+    <!-- Row 2 (y=272), columns 0-1: mid green -->
+    <rect class="tile-mid" x="64"  y="272" width="96" height="96"/>
+    <rect class="tile-mid" x="168" y="272" width="96" height="96"/>
+
+    <!-- Column 2 (x=272), rows 0-1: mid green -->
+    <rect class="tile-mid" x="272" y="64"  width="96" height="96"/>
+    <rect class="tile-mid" x="272" y="168" width="96" height="96"/>
+  </g>
+
+  <!--
+      FRACTURED BLOCK
+      The lower-right 2x2 sub-block has slipped outward and downward
+      by 40px on each axis.  This is what the algorithm "fixes".
+  -->
+  <g class="tile-stroke" transform="translate(40,40)">
+    <rect class="tile-frac" x="272" y="272" width="96" height="96"/>
+    <rect class="tile-frac" x="376" y="272" width="96" height="96"/>
+    <rect class="tile-frac" x="272" y="376" width="96" height="96"/>
+    <rect class="tile-frac" x="376" y="376" width="96" height="96"/>
+  </g>
+
+  <!--
+      FIX ARROWS
+      Two short arrows from the fractured block back into the lattice,
+      indicating the corrective transformation that re-anchors the
+      block onto its original grid positions.
+  -->
+  <g class="fix-arrow" marker-end="url(#arrowhead)">
+    <!-- top-edge fix arrow: from displaced top-left corner of the
+         fractured block (312, 312) toward its anchor target (272, 272) -->
+    <path d="M 348,312 L 296,272"/>
+    <!-- left-edge fix arrow: from displaced top-left corner downward
+         to anchor target -->
+    <path d="M 312,348 L 272,296"/>
+  </g>
+</svg>

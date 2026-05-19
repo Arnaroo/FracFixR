@@ -1,0 +1,47 @@
+cff-version: 1.2.0
+message: "If you use FracFixD in your research, please cite both the software (Zenodo DOI below) and the accompanying manuscript once published."
+title: "FracFixD: a native-D rewrite of FracFixR for fast compositional fractional fixup and differential proportion testing"
+abstract: >
+  FracFixD is a native-D, single-binary, GUI-and-CLI compositional
+  statistics tool for fractionated RNA sequencing assays.  It
+  re-implements the FracFixR method (non-negative least squares
+  fraction recovery and beta-binomial differential proportion
+  testing) in compiled native code for pipeline-scale throughput.
+  Designed for polysome profiling, subcellular fractionation,
+  monosome/disome profiling, and any other RNA-fractionation assay.
+type: software
+version: "2.0.0"
+date-released: "2026-05-19"
+license: CC-BY-NC-ND-4.0
+url: "https://github.com/Arnaroo/FracFixR"
+repository-code: "https://github.com/Arnaroo/FracFixR"
+keywords:
+  - RNA fractionation
+  - polysome profiling
+  - subcellular fractionation
+  - compositional statistics
+  - beta-binomial regression
+  - differential proportion testing
+  - non-negative least squares
+  - FracFixR
+  - FracFixD
+  - D language
+  - LDC
+authors:
+  - family-names: Shirokikh
+    given-names: Nikolay E.
+    orcid: "https://orcid.org/0000-0001-8249-358X"
+    affiliation: "The University of Western Australia"
+    email: "nikolay.shirokikh@uwa.edu.au"
+  - family-names: Ravindran
+    given-names: Agin
+    affiliation: "Arnaroo Ribologicals"
+  - family-names: Cleynen
+    given-names: Alice
+    orcid: "https://orcid.org/0000-0001-8083-0204"
+    affiliation: "CNRS, IMAG, Université de Montpellier"
+    email: "alice.cleynen@cnrs.fr"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.PLACEHOLDER"
+    description: "Zenodo concept DOI (all versions; resolves to the latest)"
