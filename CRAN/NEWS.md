@@ -1,3 +1,29 @@
+# FracFixR 1.1.0
+
+## Improvements and New Features
+
+### Bug fixes
+* Fixed parallel worker setup to use `parallelly::availableCores()` instead of
+  `parallel::detectCores() - 1`. This avoids exceeding the hard localhost worker
+  limit enforced by `parallelly` and respects the `mc.cores` option set by
+  CRAN/CI environments.
+
+### New features
+* `FracFixR()` gains two new parameters `st1` (default 0.6) and `st2` (default
+  0.999) that allow the user to control the quantile range used to select
+  informative transcripts for the NNLS regression fit. Previously these thresholds
+  were fixed at 70% and 96%.
+* New exported function `get_corrected_counts()`: converts the proportion matrix
+  from `FracFixR()` back to an interpretable count matrix by multiplying each
+  sample's proportions by the Total abundance of the matched replicate.
+
+### Internal changes
+* `TotalSum` computation now uses `na.rm = TRUE` in `rowSums()` and transcript
+  selection now explicitly filters out `NA` values, improving robustness when
+  Total samples contain missing data.
+
+---
+
 # FracFixR 1.0.0
 
 ## Initial CRAN Release

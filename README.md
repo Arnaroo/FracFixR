@@ -1,5 +1,22 @@
 # FracFixR: Fraction Correction Framework for RNA-seq Data
 
+> **This repository now ships two implementations of the same
+> compositional method:**
+> 1. **FracFixR** (R package, open source, CC BY 4.0) — the
+>    canonical reference in this repository's root and under
+>    [`CRAN/`](CRAN/).  Install with
+>    `devtools::install_github("Arnaroo/FracFixR/CRAN")`.
+> 2. **FracFixD** (native-D binaries, CC-BY-NC-ND-4.0) — the
+>    pipeline-scale binary sibling under [`FracFixD/`](FracFixD/).
+>    Single-executable GUI + CLI; Linux x86_64 binaries shipped;
+>    macOS / Windows planned.  See
+>    [`FracFixD/README.md`](FracFixD/README.md) for details.
+>
+> FracFixR remains the **scientific reference** and the right
+> entry point for most academic users.  FracFixD is its
+> production binary sibling for cluster / Snakemake / Nextflow
+> workflows.
+
 ## Table of Contents
 
 - [Introduction](#introduction)

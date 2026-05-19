@@ -16,8 +16,8 @@
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom tidyr pivot_longer
 #' @importFrom matrixStats rowProds
-#' @importFrom EnhancedVolcano EnhancedVolcano
 #' @importFrom aod betabin
+#' @importFrom parallelly availableCores
 #' @importFrom stats quantile glm binomial coef p.adjust fitted residuals
 #' @importFrom utils read.csv write.csv
 #' @importFrom grDevices dev.off
@@ -43,6 +43,14 @@ NULL
 #'     \item Type: fraction type (must include at least one "Total")
 #'     \item Replicate: replicate identifier
 #'   }
+#' @param parallel A boolean indicating whether to use parallel processing of
+#' the transcripts (default=TRUE).
+#' @param st1 Lower quantile threshold for selecting informative transcripts
+#'   used in the NNLS regression fit (default = 0.6). Transcripts below this
+#'   quantile of Total abundance are considered too noisy for reliable regression.
+#' @param st2 Upper quantile threshold for selecting informative transcripts
+#'   used in the NNLS regression fit (default = 0.999). Transcripts above this
+#'   quantile are potential outliers and are excluded from the regression.
 #'
 #' @return A list containing:
 #'   \itemize{
@@ -64,24 +72,22 @@ NULL
 #' }
 #'
 #' @examples
-#' \dontrun{
 #' # Load example data
 #' data(example_counts)
 #' data(example_annotation)
 #' 
 #' # Run FracFixR
-#' results <- FracFixR(example_counts, example_annotation)
+#' results <- FracFixR(example_counts, example_annotation, parallel=FALSE)
 #' 
 #' # View fraction proportions
 #' print(results$Fractions)
-#' }
 #'
 #' @references
 #' Cleynen et al. FracFixR: A compositional statistical framework for
 #' absolute proportion estimation between fractions in RNA sequencing data.
 #'
 #' @export
-FracFixR <- function(MatrixCounts, Annotation) {
+FracFixR <- function(MatrixCounts, Annotation, st1 = 0.6, st2 = 0.999, parallel = TRUE) {
   # --------------------------------------------------------------------------
   # Input validation: Ensure matrix format and required structure
   # --------------------------------------------------------------------------
@@ -115,9 +121,13 @@ FracFixR <- function(MatrixCounts, Annotation) {
   # --------------------------------------------------------------------------
   # Setup parallel processing for computational efficiency
   # --------------------------------------------------------------------------
-  message("Setting up parallel processing...")
-  future::plan(future::multisession, workers = parallel::detectCores() - 1)
   
+  if (parallel) {
+    message("Setting up parallel processing...")
+    future::plan(future::multisession, workers = parallelly::availableCores())
+  } else {
+    future::plan(future::sequential)  # safe default
+  }
   # --------------------------------------------------------------------------
   # Filter transcripts: Keep only those present in Total samples
   # This ensures we work with transcripts that are detectable in the whole cell
@@ -140,6 +150,7 @@ FracFixR <- function(MatrixCounts, Annotation) {
   # Initialize storage containers for results
   # --------------------------------------------------------------------------
   PropestimatesComplete <- NULL  # Proportion estimates
+  NewDataComplete       <- NULL  # Corrected count matrix
   CoefficientComplete <- list()  # Regression coefficients
   FractionsComplete <- list()    # Fraction proportions
   all_plots <- list()           # Diagnostic plots
@@ -163,26 +174,28 @@ FracFixR <- function(MatrixCounts, Annotation) {
 
     # Calculate total RNA abundance across Total samples for this condition
     if (length(wct_cond) > 1) {
-      TotalSum <- rowSums(DataDD[, wct_cond, drop = FALSE])
+      TotalSum <- rowSums(DataDD[, wct_cond, drop = FALSE], na.rm = TRUE)
     } else {
       TotalSum <- DataDD[, wct_cond]
+      TotalSum[is.na(TotalSum)] <- NA   # keep NAs explicit but let quantile skip them
     }
     if (!is.numeric(TotalSum))
       stop("TotalSum must be numeric")
 
     # ----------------------------------------------------------------------
     # Select informative transcripts for regression
-    # Use 70-96% quantile range to avoid:
+    # Use st1-st2 quantile range to avoid:
     # - Low abundance transcripts (noisy)
     # - Very high abundance transcripts (potential outliers)
     # ----------------------------------------------------------------------
-    s1 <- quantile(TotalSum, 0.7)
-    s2 <- quantile(TotalSum, 0.96)
-    message(sprintf("  Selecting transcripts with 70-96%% quantiles (range: %.1f - %.1f)", s1, s2))
+    s1 <- quantile(TotalSum, st1, na.rm = TRUE)
+    s2 <- quantile(TotalSum, st2, na.rm = TRUE)
+    message(sprintf("  Selecting transcripts with %.1f - %.1f%% quantiles (range: %.1f - %.1f)",
+                    st1 * 100, st2 * 100, s1, s2))
 
     # Create list of transcripts in the selected abundance range
     # Ensure at least 7 counts to avoid very low abundance noise
-    transcriptlist <- rownames(DataDD)[TotalSum > max(s1,7) & TotalSum < s2]
+    transcriptlist <- rownames(DataDD)[!is.na(TotalSum) & TotalSum > max(s1, 7) & TotalSum < s2]
     message(sprintf("  Selected %d transcripts for regression", length(transcriptlist)))
 
     # Check if we have enough transcripts
@@ -236,6 +249,7 @@ FracFixR <- function(MatrixCounts, Annotation) {
       # Assign meaningful names to results and compile
       # ------------------------------------------------------------------
       colnames(results$Propestimates) <- Datatemp$Sample
+      colnames(results$NewData)       <- Datatemp$Sample
       names(results$Coefficients) <- Datatemp$Type
       names(results$Coefficients)[1] <- "Lost"  # First coefficient is intercept (lost fraction)
       names(results$Fractions) <- Datatemp$Type[-1]  # Exclude Total from fractions
@@ -243,6 +257,7 @@ FracFixR <- function(MatrixCounts, Annotation) {
       # Bind results to complete matrices
       # Note: For very large datasets, consider pre-allocating matrices for efficiency
       PropestimatesComplete <- if (is.null(PropestimatesComplete)) results$Propestimates else cbind(PropestimatesComplete, results$Propestimates)
+      NewDataComplete       <- if (is.null(NewDataComplete))       results$NewData       else cbind(NewDataComplete,       results$NewData)
 
       # Store replicate-specific results with unique identifiers
       FractionsComplete[[paste(cond, rep, sep = "_")]] <- results$Fractions
@@ -258,6 +273,7 @@ FracFixR <- function(MatrixCounts, Annotation) {
   # Reorder results to match original sample order
   # --------------------------------------------------------------------------
   Propestimates <- PropestimatesComplete[, Annotation$Sample, drop = FALSE]
+  NewData       <- NewDataComplete[,       Annotation$Sample, drop = FALSE]
   
   # --------------------------------------------------------------------------
   # Compile fraction results into a single data frame
@@ -284,6 +300,7 @@ FracFixR <- function(MatrixCounts, Annotation) {
     OriginalData = DataNorm,
     Annotation = Annotation,
     Propestimates = Propestimates,
+    NewData = NewData,
     Coefficients = Coeff,
     Fractions = Fraction,
     plots = all_plots
@@ -388,10 +405,19 @@ ProcessReplicate <- function(RepMat, transcriptlist) {
     Propestimates[, j] <- Data[, j] * coef[j] / apply(cbind(Data[, 1], seen_predict, 1), 1, max)
   }
 
+  # --------------------------------------------------------------------------
+  # NewData: corrected count matrix (proportion × predicted Total, rounded)
+  # This converts proportions back to the count scale for each fraction.
+  # --------------------------------------------------------------------------
+  NewData <- Propestimates
+  for (j in 2:n) {
+    NewData[, j] <- round(Propestimates[, j] * Propestimates[, 1])
+  }
 
   # Return comprehensive results
   return(list(
     Propestimates = Propestimates,
+    NewData = NewData,
     Coefficients = Coefficients,
     Fractions = Fractions,
     plot = plotfit
@@ -429,13 +455,16 @@ ProcessReplicate <- function(RepMat, transcriptlist) {
 #' }
 #'
 #' @examples
-#' \dontrun{
+#' data(example_counts)
+#' data(example_annotation)
+#' 
+#' # Run FracFixR
+#' results <- FracFixR(example_counts, example_annotation, parallel=FALSE)
 #' # Run differential testing
-#' diff_results <- DiffPropTest(norm_results,
+#' diff_results <- DiffPropTest(results,
 #'                             Conditions = c("Control", "Treatment"),
 #'                             Types = "Heavy_Polysome",
 #'                             Test = "GLM")
-#' }
 #'
 #' @export
 DiffPropTest <- function(NormObject, Conditions, Types, Test = c("GLM", "Logit", "Wald")) {
@@ -927,12 +956,14 @@ beta_binomial_wald <- function(counts, successes, annotation) {
 #' @return ggplot2 object showing fraction proportions
 #'
 #' @examples
-#' \dontrun{
+#' data(example_counts)
+#' data(example_annotation)
+#' 
+#' # Run FracFixR
+#' results <- FracFixR(example_counts, example_annotation, parallel=FALSE)
 #' # Create fraction plot
-#' frac_plot <- PlotFractions(fracfixr_results)
-#' # Save plot
-#' ggsave("fractions.pdf", frac_plot, width = 10, height = 8)
-#' }
+#' frac_plot <- PlotFractions(results)
+#' # Save plot with ggsave("fractions.pdf", frac_plot, width = 10, height = 8)
 #'
 #' @export
 PlotFractions <- function(FracFixed) {
@@ -989,7 +1020,7 @@ PlotFractions <- function(FracFixed) {
 #' PlotComparison: Create Volcano Plot for Differential Results
 #'
 #' @description
-#' Generates an enhanced volcano plot showing transcripts with significant
+#' Generates avolcano plot showing transcripts with significant
 #' differential proportions between conditions.
 #'
 #' @param DiffPropResult Output from DiffPropTest() function
@@ -997,15 +1028,23 @@ PlotFractions <- function(FracFixed) {
 #' @param Types Character vector of fraction types analyzed
 #' @param cutoff Optional y-axis maximum for plot
 #'
-#' @return EnhancedVolcano plot object
+#' @return Volcano plot-type object
 #'
 #' @examples
-#' \dontrun{
+#' data(example_counts)
+#' data(example_annotation)
+#' 
+#' # Run FracFixR
+#' results <- FracFixR(example_counts, example_annotation,parallel=FALSE)
+#' # Run differential testing
+#' diff_results <- DiffPropTest(results,
+#'                             Conditions = c("Control", "Treatment"),
+#'                             Types = "Heavy_Polysome",
+#'                             Test = "GLM")
 #' # Create volcano plot
 #' volcano <- PlotComparison(diff_results, 
 #'                          Conditions = c("Control", "Treatment"),
 #'                          Types = "Heavy_Polysome")
-#' }
 #'
 #' @export
 PlotComparison <- function(DiffPropResult, Conditions=NULL, Types=NULL, cutoff=NULL) {
@@ -1045,29 +1084,103 @@ PlotComparison <- function(DiffPropResult, Conditions=NULL, Types=NULL, cutoff=N
   }
   
   # --------------------------------------------------------------------------
-  # Create enhanced volcano plot
+  # Create volcano plot
   # --------------------------------------------------------------------------
-  PlotTrans <- EnhancedVolcano::EnhancedVolcano(DiffPropResult,
-    lab = DiffPropResult$transcript,
-    title = title,
-    subtitle = subtitle,
-    x = 'mean_diff',
-    xlab = "Proportion shift",
-    ylab = bquote(~-Log[10] ~ italic(P.adj)),
-    legendLabels = c("NS", "prop shift", "adj.pval", "adj.pval + prop shift"),
-    FCcutoff = 0.1,  # 10% proportion shift threshold
-    xlim = c(min(DiffPropResult$mean_diff, na.rm = TRUE) - 0.1, 
-             max(DiffPropResult$mean_diff, na.rm = TRUE) + 0.1),
-    ylim = c(0, ymax),
-    titleLabSize = 25,
-    subtitleLabSize = 25,
-    captionLabSize = 22,
-    axisLabSize = 22,
-    labSize = 0,
-    legendLabSize = 15,
-    pCutoff = 0.01,  # Adjusted p-value threshold
-    y = 'padj'  # Use adjusted p-values
-  )
-  
+  PlotVolcano <- function(DiffPropResult, title = title, subtitle = NULL) {
+
+    # Define thresholds
+    FCcutoff <- 0.1
+    pCutoff <- 0.01
+
+    # Prepare the data
+    df <- DiffPropResult %>%
+      mutate(
+        neg_log_padj = -log10(.data$padj),
+        significance = case_when(
+          .data$padj < pCutoff & abs(.data$mean_diff) > FCcutoff ~ "Significant + Large shift",
+          .data$padj < pCutoff ~ "Significant",
+          abs(.data$mean_diff) > FCcutoff ~ "Large shift",
+          TRUE ~ "NS"
+        )
+      )
+
+    # Define color palette 
+    color_map <- c(
+      "NS" = "grey70",
+      "Large shift" = "#3B9AB2",
+      "Significant" = "#EBCC2A",
+      "Significant + Large shift" = "#F21A00"
+    )
+
+    # Determine y-axis limit
+    ymax <- max(df$neg_log_padj, na.rm = TRUE) * 1.05
+
+    # Build the plot
+    p <- ggplot(df, aes(x = .data$mean_diff, y = .data$neg_log_padj, color = .data$significance)) +
+      geom_point(size = 2.5, alpha = 0.8) +
+      geom_vline(xintercept = c(-FCcutoff, FCcutoff), linetype = "dashed", color = "grey40") +
+      geom_hline(yintercept = -log10(pCutoff), linetype = "dashed", color = "grey40") +
+      scale_color_manual(values = color_map, name = NULL) +
+      labs(
+        title = title,
+        subtitle = subtitle,
+        x = "Proportion shift",
+        y = expression(-log[10](adj.P))
+      ) +
+      theme_minimal(base_size = 15) +
+      theme(
+        plot.title = element_text(size = 20, face = "bold"),
+        plot.subtitle = element_text(size = 16),
+        axis.title = element_text(size = 16),
+        legend.position = "right",
+        legend.text = element_text(size = 14)
+      ) +
+      xlim(
+        min(df$mean_diff, na.rm = TRUE) - 0.1,
+        max(df$mean_diff, na.rm = TRUE) + 0.1
+      ) +
+      ylim(0, ymax)
+
+    return(p)
+  }
+  PlotTrans <- PlotVolcano(DiffPropResult, title=title)  
   return(PlotTrans)    
+}
+
+#' get_corrected_counts: Reconstruct Count Matrix from Proportion Estimates
+#'
+#' @description
+#' Returns the corrected count matrix embedded in a \code{FracFixR()} result
+#' object. This matrix is computed internally by multiplying each transcript's
+#' proportion estimate by the predicted total abundance for that replicate,
+#' providing counts that are corrected for compositional bias while remaining
+#' on the original count scale.
+#'
+#' If you need to re-scale using the raw (observed) Total counts instead of the
+#' NNLS-predicted totals, multiply \code{fracfixr_results$Propestimates} by the
+#' corresponding column of \code{fracfixr_results$OriginalData} manually.
+#'
+#' @param fracfixr_results Output list from \code{\link{FracFixR}}, which must
+#'   contain the element \code{NewData}.
+#'
+#' @return A numeric matrix with the same dimensions as
+#'   \code{fracfixr_results$Propestimates}, where non-Total columns contain
+#'   corrected counts (rounded integers) and the Total column contains the
+#'   NNLS-predicted total abundance.
+#'
+#' @examples
+#' data(example_counts)
+#' data(example_annotation)
+#'
+#' results <- FracFixR(example_counts, example_annotation, parallel = FALSE)
+#' corrected <- get_corrected_counts(results)
+#' head(corrected)
+#'
+#' @export
+get_corrected_counts <- function(fracfixr_results) {
+  if (is.null(fracfixr_results$NewData)) {
+    stop("'fracfixr_results' does not contain a 'NewData' element. ",
+         "Please re-run FracFixR() with version >= 1.1.0.")
+  }
+  return(fracfixr_results$NewData)
 }

@@ -40,12 +40,15 @@ Implements three test options: GLM (most powerful), Logit, and Wald.
 }
 }
 \examples{
-\dontrun{
+data(example_counts)
+data(example_annotation)
+
+# Run FracFixR
+results <- FracFixR(example_counts, example_annotation, parallel=FALSE)
 # Run differential testing
-diff_results <- DiffPropTest(norm_results,
+diff_results <- DiffPropTest(results,
                             Conditions = c("Control", "Treatment"),
                             Types = "Heavy_Polysome",
                             Test = "GLM")
-}
 
 }

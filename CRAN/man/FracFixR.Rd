@@ -4,7 +4,7 @@
 \alias{FracFixR}
 \title{FracFixR: Main Function for Fraction Correction}
 \usage{
-FracFixR(MatrixCounts, Annotation)
+FracFixR(MatrixCounts, Annotation, st1 = 0.6, st2 = 0.999, parallel = TRUE)
 }
 \arguments{
 \item{MatrixCounts}{A numeric matrix of raw transcript/gene counts with:
@@ -20,13 +20,27 @@ FracFixR(MatrixCounts, Annotation)
   \item Type: fraction type (must include at least one "Total")
   \item Replicate: replicate identifier
 }}
+
+\item{parallel}{A boolean indicating whether to use parallel processing of
+the transcripts (default=TRUE).}
+
+\item{st1}{Lower quantile threshold (between 0 and 1) for selecting
+informative transcripts for the NNLS regression fit (default = 0.6).
+Transcripts below this quantile of Total abundance are considered too noisy
+for reliable regression.}
+
+\item{st2}{Upper quantile threshold (between 0 and 1) for selecting
+informative transcripts for the NNLS regression fit (default = 0.999).
+Transcripts above this quantile are potential outliers and are excluded
+from the regression.}
 }
 \value{
 A list containing:
   \itemize{
     \item OriginalData: filtered input count matrix
     \item Annotation: input annotation data
-    \item Propestimates: matrix of proportion estimates
+    \item Propestimates: matrix of proportion estimates (values between 0 and 1)
+    \item NewData: corrected count matrix (proportions multiplied by predicted total, rounded)
     \item Coefficients: data.frame of regression coefficients
     \item Fractions: data.frame of estimated fraction proportions
     \item plots: list of diagnostic plots
@@ -47,17 +61,15 @@ The function works by:
 }
 }
 \examples{
-\dontrun{
 # Load example data
 data(example_counts)
 data(example_annotation)
 
 # Run FracFixR
-results <- FracFixR(example_counts, example_annotation)
+results <- FracFixR(example_counts, example_annotation, parallel=FALSE)
 
 # View fraction proportions
 print(results$Fractions)
-}
 
 }
 \references{

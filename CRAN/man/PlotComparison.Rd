@@ -16,18 +16,26 @@ PlotComparison(DiffPropResult, Conditions = NULL, Types = NULL, cutoff = NULL)
 \item{cutoff}{Optional y-axis maximum for plot}
 }
 \value{
-EnhancedVolcano plot object
+Volcano plot-type object
 }
 \description{
-Generates an enhanced volcano plot showing transcripts with significant
+Generates avolcano plot showing transcripts with significant
 differential proportions between conditions.
 }
 \examples{
-\dontrun{
+data(example_counts)
+data(example_annotation)
+
+# Run FracFixR
+results <- FracFixR(example_counts, example_annotation,parallel=FALSE)
+# Run differential testing
+diff_results <- DiffPropTest(results,
+                            Conditions = c("Control", "Treatment"),
+                            Types = "Heavy_Polysome",
+                            Test = "GLM")
 # Create volcano plot
 volcano <- PlotComparison(diff_results, 
                          Conditions = c("Control", "Treatment"),
                          Types = "Heavy_Polysome")
-}
 
 }

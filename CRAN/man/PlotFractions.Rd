@@ -17,11 +17,13 @@ Creates a stacked bar plot showing the distribution of RNA across fractions
 for each replicate, including the "lost" fraction.
 }
 \examples{
-\dontrun{
+data(example_counts)
+data(example_annotation)
+
+# Run FracFixR
+results <- FracFixR(example_counts, example_annotation, parallel=FALSE)
 # Create fraction plot
-frac_plot <- PlotFractions(fracfixr_results)
-# Save plot
-ggsave("fractions.pdf", frac_plot, width = 10, height = 8)
-}
+frac_plot <- PlotFractions(results)
+# Save plot with ggsave("fractions.pdf", frac_plot, width = 10, height = 8)
 
 }

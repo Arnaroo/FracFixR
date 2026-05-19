@@ -16,7 +16,8 @@ These should be informative transcripts in the appropriate abundance range}
 \value{
 List containing:
   \itemize{
-    \item Propestimates: Proportion estimates for each transcript
+    \item Propestimates: Proportion estimates for each transcript (values 0-1 for fraction columns)
+    \item NewData: Corrected count matrix (proportions multiplied by predicted total, rounded)
     \item Coefficients: NNLS regression coefficients (fraction weights)
     \item Fractions: Normalized fraction proportions
     \item plot: Diagnostic plot of fitted vs residuals

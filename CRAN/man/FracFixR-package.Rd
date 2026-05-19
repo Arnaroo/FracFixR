@@ -10,14 +10,6 @@ between fractions in RNA sequencing data. FracFixR addresses the fundamental
 challenge in fractionated RNA-seq experiments where library preparation and
 sequencing depth obscure the original proportions of RNA fractions.
 }
-\seealso{
-Useful links:
-\itemize{
-  \item \url{https://github.com/Arnaroo/FracFixR}
-  \item Report bugs at \url{https://github.com/Arnaroo/FracFixR/issues}
-}
-
-}
 \author{
 \strong{Maintainer}: Alice Cleynen \email{alice.cleynen@cnrs.fr} (\href{https://orcid.org/0000-0001-8083-0204}{ORCID})
 
