@@ -151,7 +151,19 @@ if not exist "%OPENBLAS_ROOT%\lib\libopenblas.lib" (
         exit /b 1
     )
 )
-echo   [OK] OpenBLAS found at %OPENBLAS_ROOT% (libopenblas.lib + libopenblas.dll)
+REM mir-blas / mir-lapack "openblas" sub-configurations name the import
+REM library `openblas` (resolves to openblas.lib) and downstream lapack
+REM references resolve to lapack.lib.  The OpenBLAS Windows pre-build
+REM ships a single `libopenblas.lib` that bundles both BLAS and LAPACK,
+REM so create both aliases pointing at the same physical library.  No-op
+REM on a re-run once the copies are in place.
+if not exist "%OPENBLAS_ROOT%\lib\openblas.lib" (
+    copy /Y "%OPENBLAS_ROOT%\lib\libopenblas.lib" "%OPENBLAS_ROOT%\lib\openblas.lib" >nul
+)
+if not exist "%OPENBLAS_ROOT%\lib\lapack.lib" (
+    copy /Y "%OPENBLAS_ROOT%\lib\libopenblas.lib" "%OPENBLAS_ROOT%\lib\lapack.lib" >nul
+)
+echo   [OK] OpenBLAS found at %OPENBLAS_ROOT% (libopenblas.lib + openblas.lib + lapack.lib + libopenblas.dll)
 set "LIB=%LIB%;%OPENBLAS_ROOT%\lib"
 
 REM Check dub.json exists
