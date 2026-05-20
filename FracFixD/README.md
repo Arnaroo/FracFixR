@@ -15,7 +15,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Arnaroo/FracFixR/releases"><img src="https://img.shields.io/badge/release-v2.0.0%20Quokka-blue" alt="release"></a>
+  <a href="https://github.com/Arnaroo/FracFixR/releases/tag/fracfixd-v2.0.0"><img src="https://img.shields.io/badge/release-v2.0.0%20Quokka-blue" alt="release"></a>
+  <a href="https://doi.org/10.5281/zenodo.20234583"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20234583-blue" alt="Zenodo DOI"></a>
+  <a href="https://doi.org/10.1093/bioinformatics/btaf615"><img src="https://img.shields.io/badge/Bioinformatics-btaf615-blue" alt="Bioinformatics paper"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/binaries-CC--BY--NC--ND--4.0-lightgrey" alt="binaries licence"></a>
   <img src="https://img.shields.io/badge/platforms-Linux%20x86__64%20%7C%20macOS%20arm64%20%7C%20Windows%20x86__64-orange" alt="platforms">
 </p>
@@ -473,21 +475,38 @@ For most academic users it is the right entry point.
 
 ## Citing
 
-If you use FracFixD (or FracFixR) in research, please cite the
-accompanying manuscript and the Zenodo DOI of the specific
-release you used.
+If you use FracFixR or FracFixD in research, please cite both
+the FracFixR method paper and the Zenodo DOI of the specific
+software release you used.
 
-**Cite the project (all versions, always resolves to the latest release):**
+**Method paper (FracFixR, *Bioinformatics* 2026):**
 
-> Shirokikh, N. E., Ravindran, A., & Cleynen, A.  *FracFixD: a native-D rewrite of FracFixR for fast compositional fractional fixup and differential proportion testing.*  Zenodo. https://doi.org/10.5281/zenodo.PLACEHOLDER
+> Cleynen, A., Ravindran, A., & Shirokikh, N. E.  *FracFixR: a compositional statistical framework for absolute proportion estimation between fractions in RNA sequencing data.*  **Bioinformatics** 42(2), February 2026, btaf615.  https://doi.org/10.1093/bioinformatics/btaf615
 
-**Cite a specific release (v2.0.0 "Quokka"):**
+**FracFixD software, all versions (concept DOI, always resolves to the latest release):**
 
-> Shirokikh, N. E., Ravindran, A., & Cleynen, A. (2026). *Arnaroo/FracFixR: FracFixD 2.0.0 "Quokka" public release.* Zenodo. https://doi.org/10.5281/zenodo.PLACEHOLDER
+> Shirokikh, N. E., Ravindran, A., & Cleynen, A.  *FracFixD: a native-D rewrite of FracFixR for fast compositional fractional fixup and differential proportion testing.*  Zenodo.  https://doi.org/10.5281/zenodo.20234583
+
+**FracFixD v2.0.0 "Quokka" specifically:**
+
+> Shirokikh, N. E., Ravindran, A., & Cleynen, A. (2026). *Arnaroo/FracFixR: FracFixD v2.0.0 "Quokka".*  Zenodo.  https://doi.org/10.5281/zenodo.20307512
 
 BibTeX:
 
 ```bibtex
+@article{cleynen2026fracfixr,
+  author  = {Cleynen, Alice and Ravindran, Agin and Shirokikh, Nikolay E.},
+  title   = {{FracFixR: a compositional statistical framework for
+              absolute proportion estimation between fractions in
+              RNA sequencing data}},
+  journal = {Bioinformatics},
+  volume  = {42},
+  number  = {2},
+  pages   = {btaf615},
+  year    = {2026},
+  doi     = {10.1093/bioinformatics/btaf615}
+}
+
 @software{fracfixd_v2,
   author    = {Shirokikh, Nikolay E. and Ravindran, Agin and Cleynen, Alice},
   title     = {{FracFixD: a native-D rewrite of FracFixR for
@@ -496,15 +515,10 @@ BibTeX:
   year      = {2026},
   version   = {2.0.0},
   publisher = {Zenodo},
-  doi       = {10.5281/zenodo.PLACEHOLDER},
-  url       = {https://github.com/Arnaroo/FracFixR}
+  doi       = {10.5281/zenodo.20307512},
+  url       = {https://doi.org/10.5281/zenodo.20307512}
 }
 ```
-
-Once the accompanying manuscript is published, this block will
-gain an additional reference to the journal article; the Zenodo
-DOIs above will continue to resolve to the archived software
-snapshots.
 
 The complementary R package, **FracFixR**, has its own
 canonical citation in [`../CRAN/cran-comments.md`](../CRAN/cran-comments.md);
