@@ -2,14 +2,14 @@
 
 > **This repository now ships two implementations of the same
 > compositional method:**
-> 1. **FracFixR** (R package, open source, CC BY 4.0) — the
+> 1. **FracFixR** (R package, open source, CC BY 4.0), the
 >    canonical reference in this repository's root and under
 >    [`CRAN/`](CRAN/).  Install with
 >    `devtools::install_github("Arnaroo/FracFixR/CRAN")`.
-> 2. **FracFixD** (native-D binaries, CC-BY-NC-ND-4.0) — the
+> 2. **FracFixD** (native-D binaries, CC-BY-NC-ND-4.0), the
 >    pipeline-scale binary sibling under [`FracFixD/`](FracFixD/).
->    Single-executable GUI + CLI; Linux x86_64 binaries shipped;
->    macOS / Windows planned.  See
+>    Single-executable GUI + CLI; Linux x86_64, macOS arm64, and
+>    Windows x86_64 binaries all shipped.  See
 >    [`FracFixD/README.md`](FracFixD/README.md) for details.
 >
 > FracFixR remains the **scientific reference** and the right
@@ -611,8 +611,7 @@ If you use FracFixR in your research, please cite both the software and the acco
 
 **Accompanying manuscript:**
 
-> Cleynen A, Ravindran A, Shirokikh N (2025). FracFixR: A compositional
-> statistical framework for absolute proportion estimation between fractions
+> Alice Cleynen, Agin Ravindran, Nikolay E Shirokikh, FracFixR: a compositional statistical framework for absolute proportion estimation between fractions in RNA sequencing data, *Bioinformatics*, Volume 42, Issue 2, February 2026, btaf615, https://doi.org/10.1093/bioinformatics/btaf615
 
 ## Contact
 
@@ -621,7 +620,7 @@ If you use FracFixR in your research, please cite both the software and the acco
 
 ### Authors
 
-- Alice Cleynen (alice.cleynen@umontpellier.fr) - Statistical methodology
+- Alice Cleynen (alice.cleynen@cnrs.fr) - Statistical methodology
 - Agin Ravindran (agin.ravindran@anu.edu.au) - Experimental data generation
 - Nikolay Shirokikh (nikolay.shirokikh@uwa.edu.au) - Conceptual framework
 
