@@ -17,8 +17,7 @@
 <p align="center">
   <a href="https://github.com/Arnaroo/FracFixR/releases"><img src="https://img.shields.io/badge/release-v2.0.0%20Quokka-blue" alt="release"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/binaries-CC--BY--NC--ND--4.0-lightgrey" alt="binaries licence"></a>
-  <img src="https://img.shields.io/badge/platforms-Linux%20x86__64%20%7C%20macOS%20arm64-orange" alt="platforms">
-  <img src="https://img.shields.io/badge/Windows%20x86__64-source%20build-yellow" alt="Windows status">
+  <img src="https://img.shields.io/badge/platforms-Linux%20x86__64%20%7C%20macOS%20arm64%20%7C%20Windows%20x86__64-orange" alt="platforms">
 </p>
 
 ---
@@ -292,14 +291,34 @@ location.
 
 ### Windows (x86_64)
 
-A pre-built Windows binary is **planned** for a follow-up
-release.  Until it lands, users with access to the source tree
-can build their own following the step-by-step recipe in
-[`docs/BUILD_WINDOWS.md`](docs/BUILD_WINDOWS.md) — the same
-recipe produces both a portable ZIP and an Inno Setup `.exe`
-installer with all GTK 3 + OpenBLAS / LAPACK / gfortran DLLs
-bundled.  Source-tree access is by request (see
-[*Source code*](#source-code)).
+A pre-built portable ZIP is shipped alongside the Linux and
+macOS artefacts:
+
+```powershell
+# PowerShell — download the ZIP
+Invoke-WebRequest -Uri https://github.com/Arnaroo/FracFixR/raw/master/FracFixD/bin/fracfixd-v2.0.0-windows-x86_64.zip `
+    -OutFile fracfixd-v2.0.0-windows-x86_64.zip
+
+# Verify (compare against SHA256SUMS in the same folder)
+Get-FileHash fracfixd-v2.0.0-windows-x86_64.zip -Algorithm SHA256
+
+# Extract anywhere and double-click `fracfixd-windows\fracfixd.exe`
+Expand-Archive fracfixd-v2.0.0-windows-x86_64.zip -DestinationPath .
+.\fracfixd-windows\fracfixd.exe --cli --version
+```
+
+The ZIP bundles the binary plus the full GTK 3 + OpenBLAS +
+gfortran runtime closure (around 70 DLLs), so it runs as a
+drop-in folder on any Windows 10/11 x86_64 host with no
+additional installation.  CLI mode (`fracfixd.exe --cli ...`)
+works on headless / server hosts; the GUI launches when the
+.exe is double-clicked.
+
+For users who prefer a system-wide install with PATH
+integration and an uninstaller, the source-build recipe in
+[`docs/BUILD_WINDOWS.md`](docs/BUILD_WINDOWS.md) also produces
+an Inno Setup `.exe` installer.  Source-tree access is by
+request (see [*Source code*](#source-code)).
 
 ---
 
@@ -376,12 +395,16 @@ FDR, shrinkage, permutation, QC, output formatting, logging).
 These are documented up front so you can decide whether v2.0.0
 fits your workflow.
 
-- **Linux x86_64 and macOS arm64 only.**  Windows x86_64
-  binary is planned for a follow-up release; build instructions
-  are shipped today and Seva is producing the binary.
-- **GUI is Linux-only this release.**  CLI mode works on every
-  platform the binaries are built for; the GTK3 GUI only ships
-  for Linux in v2.0.0.
+- **x86_64 only on Linux and Windows; arm64 only on macOS.**
+  Linux/macOS arm64 (Linux on Apple Silicon, Raspberry Pi, etc.)
+  and x86_64 macOS (Intel Macs) are planned for follow-up
+  releases.
+- **Windows installer is portable-ZIP only in v2.0.0.**  A
+  signed Inno Setup `.exe` installer can be produced from
+  the source tree (see [`docs/BUILD_WINDOWS.md`](docs/BUILD_WINDOWS.md));
+  the released artefact is the unsigned portable ZIP, so
+  Windows SmartScreen may flag it on first launch (click
+  "More info" then "Run anyway").
 - **`--bb-step-rule deterministic` ships EXPERIMENTAL.**  On the
   N=1000 dev fixture it reaches log₂FC Spearman 0.98 (vs the
   classic 0.99+ target), the residual gap is a small number of

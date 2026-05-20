@@ -29,6 +29,13 @@ package.
   GTK 3, OpenBLAS and gfortran runtimes are bundled into the
   `.app`; the launcher is a native Mach-O so Tahoe Gatekeeper
   accepts it.
+- **Windows x86_64 release artefact**, a portable ZIP
+  (`fracfixd-v2.0.0-windows-x86_64.zip`) containing
+  `fracfixd.exe` plus the full GTK 3 + OpenBLAS + gfortran
+  runtime closure (around 70 DLLs).  Drop the unzipped folder
+  on any Windows 10/11 host and double-click `fracfixd.exe`,
+  no installer or admin rights required.  A signed Inno Setup
+  `.exe` installer can be produced from the source tree.
 - **Single binary, GUI + CLI**: no command-line flags launches
   the GTK3 GUI; `--cli` or any subcommand drops into headless
   console mode.
@@ -59,8 +66,9 @@ package.
 - **Native SVG volcano plots** with optional EnhancedVolcano-
   style R reproduction script export.
 
-Windows x86_64 binary is planned for a follow-up release;
-source-build instructions are shipped in
+Source-build instructions for all three platforms ship in
+[`docs/BUILD_LINUX.md`](docs/BUILD_LINUX.md),
+[`docs/BUILD_MACOS.md`](docs/BUILD_MACOS.md) and
 [`docs/BUILD_WINDOWS.md`](docs/BUILD_WINDOWS.md).
 
 ### Equivalence
