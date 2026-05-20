@@ -122,16 +122,37 @@ if not exist "%MSYS2_ROOT%\mingw64\bin\libgtk-3-0.dll" (
 )
 echo   [OK] MSYS2 + GTK3 found at %MSYS2_ROOT%
 
-REM Check OpenBLAS + LAPACK (FracFixD specific)
-if not exist "%MSYS2_ROOT%\mingw64\bin\libopenblas.dll" (
-    echo   WARNING: OpenBLAS not found at %MSYS2_ROOT%\mingw64\bin\
-    echo   FracFixD needs OpenBLAS at runtime. Install with:
-    echo     pacman -S mingw-w64-x86_64-openblas mingw-w64-x86_64-lapack
-    echo   Build will likely fail at link time.
+REM Check OpenBLAS Windows release (MSVC-compatible .lib + .dll).
+REM MSYS2's MinGW openblas ships .a (MinGW format), which the MSVC
+REM linker LDC uses with -mtriple=x86_64-windows-msvc cannot consume.
+REM Use the official OpenBLAS Windows pre-build instead.
+set "OPENBLAS_ROOT=C:\OpenBLAS"
+set "OPENBLAS_VERSION=0.3.30"
+set "OPENBLAS_URL=https://github.com/OpenMathLib/OpenBLAS/releases/download/v%OPENBLAS_VERSION%/OpenBLAS-%OPENBLAS_VERSION%-x64.zip"
+
+if not exist "%OPENBLAS_ROOT%\lib\libopenblas.lib" (
+    echo   [..] OpenBLAS not found at %OPENBLAS_ROOT%\lib\libopenblas.lib
+    echo        Downloading OpenBLAS %OPENBLAS_VERSION% Windows pre-build...
+    if not exist "%TEMP%\openblas-%OPENBLAS_VERSION%.zip" (
+        powershell -NoProfile -Command "Invoke-WebRequest -Uri '%OPENBLAS_URL%' -OutFile '%TEMP%\openblas-%OPENBLAS_VERSION%.zip' -UseBasicParsing" || (
+            echo   ERROR: download failed. Manually download from:
+            echo     %OPENBLAS_URL%
+            echo   and extract to %OPENBLAS_ROOT%\.
+            exit /b 1
+        )
+    )
+    powershell -NoProfile -Command "Expand-Archive -Path '%TEMP%\openblas-%OPENBLAS_VERSION%.zip' -DestinationPath '%OPENBLAS_ROOT%' -Force" || (
+        echo   ERROR: extract failed.  Manually extract %TEMP%\openblas-%OPENBLAS_VERSION%.zip to %OPENBLAS_ROOT%\.
+        exit /b 1
+    )
+    if not exist "%OPENBLAS_ROOT%\lib\libopenblas.lib" (
+        echo   ERROR: %OPENBLAS_ROOT%\lib\libopenblas.lib still missing after extract.
+        echo   Check the zip layout; expected lib\libopenblas.lib + bin\libopenblas.dll.
+        exit /b 1
+    )
 )
-if not exist "%MSYS2_ROOT%\mingw64\bin\liblapack.dll" (
-    echo   WARNING: LAPACK not found at %MSYS2_ROOT%\mingw64\bin\
-)
+echo   [OK] OpenBLAS found at %OPENBLAS_ROOT% (libopenblas.lib + libopenblas.dll)
+set "LIB=%LIB%;%OPENBLAS_ROOT%\lib"
 
 REM Check dub.json exists
 if not exist "dub.json" (

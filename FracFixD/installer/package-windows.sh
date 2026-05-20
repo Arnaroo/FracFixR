@@ -99,6 +99,32 @@ ldd fracfixd.exe 2>/dev/null | grep -i mingw64 | awk '{print $3}' | sort -u | wh
     fi
 done
 
+# OpenBLAS Windows pre-build (C:\OpenBLAS\bin\libopenblas.dll) — the
+# runtime needed by the .lib the MSVC linker consumed at build time.
+# Copy it (and its transitive MinGW Fortran-runtime deps, if any) into
+# the staging dir alongside the GTK DLLs.
+OPENBLAS_BIN="${OPENBLAS_ROOT:-C:/OpenBLAS}/bin"
+# Convert Windows path (C:\OpenBLAS\bin) to a /c/OpenBLAS/bin MSYS form.
+OPENBLAS_BIN_MSYS="${OPENBLAS_BIN//\\//}"
+case "$OPENBLAS_BIN_MSYS" in
+    [A-Za-z]:/*)
+        DRV=$(printf '%s' "${OPENBLAS_BIN_MSYS:0:1}" | tr '[:upper:]' '[:lower:]')
+        OPENBLAS_BIN_MSYS="/${DRV}${OPENBLAS_BIN_MSYS:2}"
+        ;;
+esac
+if [ -d "$OPENBLAS_BIN_MSYS" ]; then
+    for dll in libopenblas.dll libgfortran-5.dll libgcc_s_seh-1.dll \
+               libquadmath-0.dll libwinpthread-1.dll; do
+        if [ -f "$OPENBLAS_BIN_MSYS/$dll" ]; then
+            cp -f "$OPENBLAS_BIN_MSYS/$dll" "$DIST_DIR/" 2>/dev/null || true
+        fi
+    done
+    echo "       [OK] OpenBLAS runtime DLLs from $OPENBLAS_BIN_MSYS"
+else
+    echo "       [!!] OpenBLAS not found at $OPENBLAS_BIN_MSYS"
+    echo "            The .exe will fail to load libopenblas.dll at runtime."
+fi
+
 # Method 2: Belt-and-braces — explicit copy of essential support DLLs.
 EXTRA_DLLS=(
     libgcc_s_seh-1.dll libwinpthread-1.dll libstdc++-6.dll

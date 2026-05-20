@@ -24,35 +24,54 @@ creation, and optional Inno Setup `.exe` installer compilation.
 
 You only need to do this once per machine.
 
-### 1.1 MSYS2 + GTK 3 + OpenBLAS + LAPACK
+### 1.1 MSYS2 + GTK 3
+
+MSYS2's MinGW openblas ships in `.a` format, which the MSVC
+linker LDC uses cannot consume.  We use MSYS2 only for the GTK
+3 runtime stack; OpenBLAS comes from the official Windows
+pre-build in Step 1.5 below (auto-downloaded by the build
+script if missing).
 
 1. Download MSYS2 from **https://www.msys2.org/** and run the
    installer.  Accept the default install path (`C:\msys64`).
 2. Open the **"MSYS2 MINGW64"** shortcut from the Start Menu
-   (NOT the plain "MSYS2 MSYS" — they're different).
+   (NOT the plain "MSYS2 MSYS", they are different).
 3. In the MINGW64 terminal, run:
 
 ```bash
 pacman -Syu                                    # initial sync; close + reopen shell after
 pacman -Syu                                    # second pass
 pacman -S mingw-w64-x86_64-gtk3 \
-          mingw-w64-x86_64-openblas \
-          mingw-w64-x86_64-lapack \
           mingw-w64-x86_64-pkg-config \
           mingw-w64-x86_64-gcc \
           mingw-w64-x86_64-binutils \
           unzip wget zip
 ```
 
-Verify GTK 3 and OpenBLAS are installed:
+Verify GTK 3 is installed:
 
 ```bash
 ls /mingw64/bin/libgtk-3-0.dll          # should exist (~10 MB)
-ls /mingw64/bin/libopenblas.dll          # should exist (~50 MB)
-ls /mingw64/bin/liblapack.dll            # should exist
 ```
 
-If any are missing, re-run `pacman -S` for that package.
+If missing, re-run `pacman -S mingw-w64-x86_64-gtk3`.
+
+### 1.5 OpenBLAS Windows pre-build (auto-installed)
+
+The build script will auto-download the official OpenBLAS
+Windows pre-build (https://github.com/OpenMathLib/OpenBLAS/releases)
+to `C:\OpenBLAS\` if it isn't already there.  No manual install
+needed.  If you want to pre-populate it yourself (e.g. on a
+network-restricted machine):
+
+1. Download
+   `OpenBLAS-0.3.30-x64.zip` from the OpenBLAS releases page.
+2. Extract to `C:\OpenBLAS\` so that
+   `C:\OpenBLAS\lib\libopenblas.lib` and
+   `C:\OpenBLAS\bin\libopenblas.dll` both exist.
+
+The OpenBLAS Windows pre-build includes LAPACK in the same DLL,
+so no separate LAPACK install is needed.
 
 ### 1.2 Visual Studio Build Tools
 
@@ -295,16 +314,23 @@ You opened a regular `cmd.exe` instead of the **"x64 Native
 Tools Command Prompt for VS 2022"**.  Close and reopen from
 the correct Start Menu shortcut.
 
-### `BUILD FAILED ... linker error openblas`
+### `LINK : fatal error LNK1181: cannot open input file 'openblas.lib'`
 
-OpenBLAS is not installed in MSYS2.  In an MSYS2 MINGW64
-terminal:
+The MSVC linker cannot find the OpenBLAS import library.  The
+build script auto-downloads OpenBLAS to `C:\OpenBLAS\` if
+missing; this error means either the download did not run or
+it failed.  Manual recovery:
 
-```bash
-pacman -S mingw-w64-x86_64-openblas mingw-w64-x86_64-lapack
-```
+1. Download
+   `OpenBLAS-0.3.30-x64.zip` from
+   https://github.com/OpenMathLib/OpenBLAS/releases.
+2. Extract to `C:\OpenBLAS\` so that
+   `C:\OpenBLAS\lib\libopenblas.lib` exists.
+3. Re-run `installer\build-windows.bat`.
 
-Then re-run `installer\build-windows.bat`.
+Do NOT use MSYS2's `mingw-w64-x86_64-openblas` package: it
+ships in `.a` (MinGW) format, which the MSVC linker cannot
+consume.
 
 ### `No DLLs were collected`
 
@@ -357,8 +383,7 @@ release-engineering cycle:
 | Windows | 11 (build 22631) |
 | MSYS2 | 2026-01 rolling release |
 | GTK 3 (mingw-w64) | 3.24.43+ |
-| OpenBLAS (mingw-w64) | 0.3.28+ |
-| LAPACK (mingw-w64) | 3.12.0+ |
+| OpenBLAS (official Windows pre-build at `C:\OpenBLAS\`) | 0.3.30 |
 | Visual Studio Build Tools | 2022 v17.10+ |
 | LDC | 1.42.0 |
 | Inno Setup | 6.3.3+ |
