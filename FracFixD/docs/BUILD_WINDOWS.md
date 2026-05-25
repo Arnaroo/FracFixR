@@ -206,7 +206,7 @@ The script will:
   needs at runtime — into `dist\fracfixd-windows\lib\` and
   `dist\fracfixd-windows\share\`.
 - **Step 5/6**: Wrap the whole staging tree in a portable ZIP:
-  `dist\fracfixd-v2.0.0-windows-x86_64.zip` (~40 MB).
+  `dist\fracfixd-v2.0.2-windows-x86_64.zip` (~40 MB).
 - **Step 6/6**: (skipped without `--installer`).
 
 Expected output on success:
@@ -219,7 +219,7 @@ Expected output on success:
   Output files in dist\:
 
     fracfixd.exe                                  6500000 bytes
-    fracfixd-v2.0.0-windows-x86_64.zip            38000000 bytes
+    fracfixd-v2.0.2-windows-x86_64.zip            38000000 bytes
 
   Staging directory: dist\fracfixd-windows\
 
@@ -243,7 +243,7 @@ This re-runs the build (or `--skip-build` to reuse the existing
 `iscc.exe` on `installer\fracfixd-installer.iss` to produce:
 
 ```
-dist\FracFixD-2.0.0-windows-x86_64-setup.exe         (~30 MB)
+dist\FracFixD-2.0.2-windows-x86_64-setup.exe         (~30 MB)
 ```
 
 End-user experience: double-click `.exe`, accept the licence,
@@ -267,16 +267,16 @@ dist\fracfixd-windows\fracfixd.exe --cli --version
 dist\fracfixd-windows\fracfixd.exe --cli help diffprop
 
 :: SHA-256 hash for the release-notes SHA256SUMS file
-powershell -NoProfile -Command "Get-FileHash dist\fracfixd-v2.0.0-windows-x86_64.zip -Algorithm SHA256"
-powershell -NoProfile -Command "Get-FileHash dist\FracFixD-2.0.0-windows-x86_64-setup.exe -Algorithm SHA256"
+powershell -NoProfile -Command "Get-FileHash dist\fracfixd-v2.0.2-windows-x86_64.zip -Algorithm SHA256"
+powershell -NoProfile -Command "Get-FileHash dist\FracFixD-2.0.2-windows-x86_64-setup.exe -Algorithm SHA256"
 ```
 
 The `--version` output should display the banner:
 
 ```
 +----------------------------------------------------------------+
-|   Version:   2.0.0                                             |
-|   Codename:  Quokka                                            |
+|   Version:   2.0.2                                             |
+|   Codename:  Quokka-2                                           |
 |   Status:    Stable                                            |
 +----------------------------------------------------------------+
 ```
@@ -287,8 +287,8 @@ The `--version` output should display the banner:
 
 Send Nick (or whoever is collating the release):
 
-1. `dist\fracfixd-v2.0.0-windows-x86_64.zip`
-2. `dist\FracFixD-2.0.0-windows-x86_64-setup.exe` (if you ran
+1. `dist\fracfixd-v2.0.2-windows-x86_64.zip`
+2. `dist\FracFixD-2.0.2-windows-x86_64-setup.exe` (if you ran
    `--installer`)
 3. The two SHA-256 hashes from Step 5.
 
@@ -347,7 +347,7 @@ in `/mingw64/bin/`.  Either:
 
 The unsigned `.exe` triggers a one-time SmartScreen confirmation.
 Click "More info" → "Run anyway".  Code signing requires an
-Authenticode certificate and is outside the v2.0.0 scope.
+Authenticode certificate and is outside the v2.0.2 scope.
 
 ### `vcruntime140.dll not found` on end-user machine
 
@@ -375,8 +375,8 @@ the `EXTRA_DLLS` array in `package-windows.sh` and rerun.
 
 ## Reference: build-host snapshot
 
-The reference Windows build host used during the v2.0.0
-release-engineering cycle:
+The reference Windows build host used during the v2.0.0 and
+v2.0.2 release-engineering cycles:
 
 | Component | Version |
 |---|---|

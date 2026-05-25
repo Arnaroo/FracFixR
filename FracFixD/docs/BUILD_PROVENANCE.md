@@ -1,4 +1,4 @@
-# FracFixD v2.0.0 "Quokka" — Build Provenance
+# FracFixD v2.0.2 "Quokka-2" — Build Provenance
 
 This document records exactly how the binaries shipped in
 [`../bin/`](../bin/) were produced.  It is intended to give
@@ -153,8 +153,8 @@ After install, the binary's own self-report should agree:
 ```bash
 fracfixd --version
 # +----------------------------------------------------------------+
-# |   Version:   2.0.0                                             |
-# |   Codename:  Quokka                                            |
+# |   Version:   2.0.2                                             |
+# |   Codename:  Quokka-2                                           |
 # |   Status:    Stable                                            |
 # +----------------------------------------------------------------+
 ```

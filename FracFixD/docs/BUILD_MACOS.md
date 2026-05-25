@@ -3,7 +3,7 @@
 > **NOTE.** The FracFixD source code is closed and confidential
 > (see [`../README.md` → Source code](../README.md#source-code)).
 > This document is the **verified macOS build recipe** that
-> produced the `FracFixD-2.0.0-macos-arm64.dmg` shipped in
+> produced the `FracFixD-2.0.2-macos-arm64.dmg` shipped in
 > [`../bin/`](../bin/).  It was validated end-to-end on a
 > macincloud Apple Silicon build host running macOS 26 (Tahoe).
 >
@@ -121,7 +121,7 @@ file ./fracfixd
 # Should report: Mach-O 64-bit executable arm64
 
 DYLD_LIBRARY_PATH=/opt/homebrew/lib ./fracfixd --cli --version
-# Should print the v2.0.0 "Quokka" banner.
+# Should print the v2.0.2 "Quokka-2" banner.
 ```
 
 ---
@@ -176,7 +176,7 @@ Expected output on success:
 ```
 Bundle ready:    /Users/admin/FracFixD/dist/fracfixd-macos  (55M)
 .app ready:      /Users/admin/FracFixD/dist/FracFixD.app     (56M)
-.dmg ready:      /Users/admin/FracFixD/dist/FracFixD-2.0.0-macos-arm64.dmg     (21M)
+.dmg ready:      /Users/admin/FracFixD/dist/FracFixD-2.0.2-macos-arm64.dmg     (21M)
 ```
 
 ---
@@ -196,18 +196,18 @@ DYLD_LIBRARY_PATH=~/FracFixD/dist/FracFixD.app/Contents/Resources/lib \
 ~/FracFixD/dist/fracfixd-macos/bin/fracfixd-launcher.sh --cli --version
 
 # Verify the .dmg
-hdiutil verify ~/FracFixD/dist/FracFixD-2.0.0-macos-arm64.dmg
+hdiutil verify ~/FracFixD/dist/FracFixD-2.0.2-macos-arm64.dmg
 
 # Hash for SHA256SUMS
-shasum -a 256 ~/FracFixD/dist/FracFixD-2.0.0-macos-arm64.dmg
+shasum -a 256 ~/FracFixD/dist/FracFixD-2.0.2-macos-arm64.dmg
 ```
 
 The `--cli --version` output should display the standard banner:
 
 ```
 +----------------------------------------------------------------+
-|   Version:   2.0.0                                             |
-|   Codename:  Quokka                                            |
+|   Version:   2.0.2                                             |
+|   Codename:  Quokka-2                                           |
 |   Status:    Stable                                            |
 +----------------------------------------------------------------+
 ```
@@ -223,11 +223,11 @@ release host:
 ```bash
 # On the macincloud host (where the build ran)
 cd ~/FracFixD
-tar -czf fracfixd-2.0.0-macos-arm64.tar.gz dist/fracfixd-macos
+tar -czf fracfixd-2.0.2-macos-arm64.tar.gz dist/fracfixd-macos
 
 # On the release host
-scp builder@DXSnnn.macincloud.com:FracFixD/dist/FracFixD-2.0.0-macos-arm64.dmg ./
-scp builder@DXSnnn.macincloud.com:FracFixD/fracfixd-2.0.0-macos-arm64.tar.gz ./
+scp builder@DXSnnn.macincloud.com:FracFixD/dist/FracFixD-2.0.2-macos-arm64.dmg ./
+scp builder@DXSnnn.macincloud.com:FracFixD/fracfixd-2.0.2-macos-arm64.tar.gz ./
 ```
 
 Drop both into `FracFixD/bin/` of the release repo and update
@@ -263,7 +263,7 @@ directly:
 Or extract the relocatable tarball:
 
 ```bash
-tar -xzf fracfixd-2.0.0-macos-arm64.tar.gz
+tar -xzf fracfixd-2.0.2-macos-arm64.tar.gz
 ./fracfixd-macos/bin/fracfixd-launcher.sh --cli --version
 ```
 
@@ -311,7 +311,7 @@ terminal (`arch` should report `arm64`) and rebuild.
 
 ## Reference: macincloud build-host snapshot
 
-The reference build host used for the v2.0.0 release-engineering
+The reference build host used for the v2.0.2 release-engineering
 cycle:
 
 | Component | Version |

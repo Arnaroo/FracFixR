@@ -6,6 +6,68 @@ itself.
 
 ---
 
+## v2.0.2 "Quokka-2" 2026-05-26
+
+GUI usability + multi-condition visualisation release.  No
+changes to the numeric kernels — equivalence-harness numbers and
+CLI output bytes carry over from v2.0.1 unchanged.
+
+### Highlights
+
+- **Multi-condition plots**: four new visualisations for the
+  K ≥ 3 / global-test pipeline, surfaced via a Pairwise /
+  Multi-Cond sub-notebook inside the [Plots] tab:
+  - **Global test (test stat)** — log₁₀(χ²/Wald) vs −log₁₀(padj),
+    coloured by significance threshold, top-N labelled.
+  - **p-value histogram** — 50-bin distribution with the cutoff
+    drawn in.  Standard diagnostic for any multi-test pipeline:
+    uniform = no signal, spike near 0 = real effects, spike near
+    1 = test misspecification.
+  - **Per-contrast volcano grid** — one pairwise volcano per
+    contrast pair (e.g. `Mix1_vs_Mix2`, `Mix1_vs_Mix3`) tiled in
+    a grid so you can see which contrasts drive the global hit.
+  - **Top-N condition-means heatmap** — row z-score (or raw mean)
+    proportion per condition for the top-N most-significant
+    transcripts; blue/red colour scale, configurable row count.
+- **Plot zoom**: Ctrl+wheel zooms whichever plot pane the cursor
+  is over; Ctrl++ / Ctrl+- / Ctrl+0 zooms every visible pane.
+  Re-rasterised from source SVG at each zoom step for vector-
+  sharp output.
+- **GUI load-choke fix**: a hand-rolled TSV parser plus an
+  on-disk parsed-input cache (FFXD1ICA format, sidecar
+  `<input>.ffxdcache` or XDG cache-dir fallback) cuts the
+  205 000-row reference load from many seconds to ~95 ms cold /
+  ~80 ms warm.  Determinate byte-progress bar and a working
+  Cancel button now appear on long jobs (rooted GLib Idle /
+  Timeout sources fix the GUI-freeze-on-load regression v2.0.1
+  shipped with).
+- **GUI window-resize polish**: minimum window size dropped to
+  360×240 (fits split-screen, tablet, VNC); each tab grows
+  horizontal and vertical scrollbars on demand so no widget
+  becomes unreachable when the user shrinks the window.
+- **Volcano legend XML-escape fix**: the literal `padj<cut`
+  legend text was being parsed by librsvg as the start of a
+  `<cut>` tag, which silently blanked the GUI volcano preview.
+  Legend strings now route through the existing `escapeXml()`
+  helper (`padj&lt;cut`, `|log2FC|&gt;cut`).
+
+### Compatibility
+
+- Default-flag CLI invocations and GUI runs that leave the new
+  selectors at their defaults produce byte-identical output to
+  v2.0.1.
+- The on-disk FFXD1ICA cache is opt-in via the GUI's Data tab;
+  the CLI is unaffected.  Cache files are validated against the
+  source TSV's mtime + size before reuse, so editing the input
+  silently invalidates the cache.
+- All three platforms (Linux x86_64 microarch variants, macOS
+  arm64 .dmg + relocatable tarball, Windows x86_64 portable
+  ZIP) rebuilt for v2.0.2.  macOS built on the macincloud
+  Apple Silicon host (macOS 26.2 Tahoe, Homebrew GTK 3.24.52,
+  OpenBLAS 0.3.33, LDC 1.42.0).
+
+---
+
 ## v2.0.0 "Quokka" 2026-05-19
 
 First public release.

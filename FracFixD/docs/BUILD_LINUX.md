@@ -89,7 +89,7 @@ sha256sum * > SHA256SUMS
 
 ```bash
 ./dist/fracfixd-linux-generic-x86_64 --version
-# Should report:  Version 2.0.0, Codename Quokka, Status Stable
+# Should report:  Version 2.0.2, Codename Quokka-2, Status Stable
 
 ./dist/fracfixd-linux-generic-x86_64 --cli help diffprop
 # Should print diffprop help WITHOUT initialising GTK

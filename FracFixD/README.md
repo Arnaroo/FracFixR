@@ -15,11 +15,101 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Arnaroo/FracFixR/releases/tag/fracfixd-v2.0.0"><img src="https://img.shields.io/badge/release-v2.0.0%20Quokka-blue" alt="release"></a>
+  <a href="https://github.com/Arnaroo/FracFixR/releases/tag/fracfixd-v2.0.2"><img src="https://img.shields.io/badge/release-v2.0.2%20Quokka--2-blue" alt="release"></a>
   <a href="https://doi.org/10.5281/zenodo.20234583"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20234583-blue" alt="Zenodo DOI"></a>
   <a href="https://doi.org/10.1093/bioinformatics/btaf615"><img src="https://img.shields.io/badge/Bioinformatics-btaf615-blue" alt="Bioinformatics paper"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/binaries-CC--BY--NC--ND--4.0-lightgrey" alt="binaries licence"></a>
   <img src="https://img.shields.io/badge/platforms-Linux%20x86__64%20%7C%20macOS%20arm64%20%7C%20Windows%20x86__64-orange" alt="platforms">
+</p>
+
+---
+
+## GUI tour
+
+The single binary launches the GTK 3 GUI with no arguments and
+drops into the CLI when given any subcommand or `--cli`.  The
+tour below walks the seven operational tabs on the worked
+3-condition example fixture (`Mix1 / Mix2 / Mix3 × Frac1 /
+Frac2 / Total × 2 reps`, 205 545 transcripts).
+
+### 1 — Data tab: load counts + annotation
+
+Drop the two TSVs into the path entries (or use the Browse
+dialogs).  Hit Load — the counts file is parsed in ≈ 95 ms cold
+(`~80 ms warm via the on-disk parsed-input cache, written
+beside the TSV as `<file>.ffxdcache`).  A determinate
+byte-progress bar and a working Cancel button cover any large
+load.
+
+<p align="center">
+  <img src="resources/screenshots/01-data-tab-loaded.png" alt="Data tab — loaded from cache" width="720"/>
+</p>
+
+### 2 — FracFix tab: compositional fixup
+
+Optional sliders for the FracFixR-1.1.0 `st1 / st2` quantile
+bounds and an auto-profiler override row.  Click Run — the
+status line reports the number of per-replicate NNLS fits
+computed.
+
+<p align="center">
+  <img src="resources/screenshots/02-fracfix-tab.png" alt="FracFix tab" width="720"/>
+</p>
+
+### 3 — DiffProp tab: pairwise differential proportions
+
+Pick condition A / B, fraction type, test route, and the FDR /
+shrinkage / dispersion / sandwich-cluster selectors.  Seven
+test backends are available (Wald, GLM-LRT, logit, score, HC0 /
+HC3 sandwich, quasi).
+
+<p align="center">
+  <img src="resources/screenshots/03-diffprop-tab.png" alt="DiffProp tab" width="720"/>
+</p>
+
+### 4 — Multi-Cond tab: K-condition global test
+
+The detected conditions auto-fill on load — first condition is
+the design-matrix baseline.  Pick `lrt` or `wald` for the
+global test, optional comma-separated contrast pairs
+(`Mix1:Mix2,Mix2:Mix3` here).  Companion contrast TSVs land
+alongside the global TSV via the same `<out>.A_vs_B.tsv` naming
+pattern the CLI uses.
+
+<p align="center">
+  <img src="resources/screenshots/04-multicond-tab.png" alt="Multi-Cond tab" width="720"/>
+</p>
+
+### 5 — Plots tab → Pairwise sub-tab
+
+Volcano (DiffProp result) + per-sample fractions barplot
+(FracFix result), side by side.  All plots support Ctrl+wheel
+zoom (per-pane) and Ctrl++ / Ctrl+- / Ctrl+0 (all-panes).
+
+<p align="center">
+  <img src="resources/screenshots/05-plots-pairwise.png" alt="Plots tab — Pairwise sub-tab" width="900"/>
+</p>
+
+### 6 — Plots tab → Multi-Cond sub-tab
+
+Four diagnostic plots from the Multi-Cond result:
+top-left = global-test volcano, top-right = p-value histogram,
+bottom-left = per-contrast volcano grid, bottom-right = top-N
+condition-means heatmap.
+
+<p align="center">
+  <img src="resources/screenshots/06-plots-multicond.png" alt="Plots tab — Multi-Cond sub-tab" width="900"/>
+</p>
+
+### 7 — Log tab: live audit trail
+
+Every worker log line lands here in append-only form, mirroring
+what would have gone to the `--log FILE` of an equivalent CLI
+invocation.  Useful for translating a GUI session back into a
+reproducible CLI command for a Snakemake / Nextflow rule.
+
+<p align="center">
+  <img src="resources/screenshots/07-log-tab.png" alt="Log tab — full pipeline trace" width="720"/>
 </p>
 
 ---
@@ -266,14 +356,14 @@ A native arm64 `.dmg` is shipped alongside the Linux binaries:
 
 ```bash
 # Download the .dmg
-curl -fsSL https://github.com/Arnaroo/FracFixR/raw/master/FracFixD/bin/FracFixD-2.0.0-macos-arm64.dmg \
-     -o FracFixD-2.0.0-macos-arm64.dmg
+curl -fsSL https://github.com/Arnaroo/FracFixR/raw/master/FracFixD/bin/FracFixD-2.0.2-macos-arm64.dmg \
+     -o FracFixD-2.0.2-macos-arm64.dmg
 
 # Verify (compare against SHA256SUMS)
-shasum -a 256 FracFixD-2.0.0-macos-arm64.dmg
+shasum -a 256 FracFixD-2.0.2-macos-arm64.dmg
 
 # Mount + install
-open FracFixD-2.0.0-macos-arm64.dmg
+open FracFixD-2.0.2-macos-arm64.dmg
 # Drag FracFixD.app into the Applications symlink.
 ```
 
@@ -287,7 +377,7 @@ xattr -dr com.apple.quarantine /Applications/FracFixD.app
 ```
 
 For CLI / pipeline use, a relocatable tarball is also shipped:
-`fracfixd-2.0.0-macos-arm64.tar.gz`.  Extract and call
+`fracfixd-2.0.2-macos-arm64.tar.gz`.  Extract and call
 `./fracfixd-macos/bin/fracfixd-launcher.sh --cli ...` from any
 location.
 
@@ -298,14 +388,14 @@ macOS artefacts:
 
 ```powershell
 # PowerShell — download the ZIP
-Invoke-WebRequest -Uri https://github.com/Arnaroo/FracFixR/raw/master/FracFixD/bin/fracfixd-v2.0.0-windows-x86_64.zip `
-    -OutFile fracfixd-v2.0.0-windows-x86_64.zip
+Invoke-WebRequest -Uri https://github.com/Arnaroo/FracFixR/raw/master/FracFixD/bin/fracfixd-v2.0.2-windows-x86_64.zip `
+    -OutFile fracfixd-v2.0.2-windows-x86_64.zip
 
 # Verify (compare against SHA256SUMS in the same folder)
-Get-FileHash fracfixd-v2.0.0-windows-x86_64.zip -Algorithm SHA256
+Get-FileHash fracfixd-v2.0.2-windows-x86_64.zip -Algorithm SHA256
 
 # Extract anywhere and double-click `fracfixd-windows\fracfixd.exe`
-Expand-Archive fracfixd-v2.0.0-windows-x86_64.zip -DestinationPath .
+Expand-Archive fracfixd-v2.0.2-windows-x86_64.zip -DestinationPath .
 .\fracfixd-windows\fracfixd.exe --cli --version
 ```
 
@@ -392,21 +482,21 @@ FDR, shrinkage, permutation, QC, output formatting, logging).
 
 ---
 
-## Known limitations in v2.0.0
+## Known limitations in v2.0.2
 
-These are documented up front so you can decide whether v2.0.0
+These are documented up front so you can decide whether v2.0.2
 fits your workflow.
 
 - **x86_64 only on Linux and Windows; arm64 only on macOS.**
   Linux/macOS arm64 (Linux on Apple Silicon, Raspberry Pi, etc.)
   and x86_64 macOS (Intel Macs) are planned for follow-up
   releases.
-- **Windows installer is portable-ZIP only in v2.0.0.**  A
-  signed Inno Setup `.exe` installer can be produced from
-  the source tree (see [`docs/BUILD_WINDOWS.md`](docs/BUILD_WINDOWS.md));
-  the released artefact is the unsigned portable ZIP, so
-  Windows SmartScreen may flag it on first launch (click
-  "More info" then "Run anyway").
+- **Windows installer is portable-ZIP only.**  A signed Inno
+  Setup `.exe` installer can be produced from the source tree
+  (see [`docs/BUILD_WINDOWS.md`](docs/BUILD_WINDOWS.md)); the
+  released artefact is the unsigned portable ZIP, so Windows
+  SmartScreen may flag it on first launch (click "More info"
+  then "Run anyway").
 - **`--bb-step-rule deterministic` ships EXPERIMENTAL.**  On the
   N=1000 dev fixture it reaches log₂FC Spearman 0.98 (vs the
   classic 0.99+ target), the residual gap is a small number of
@@ -487,9 +577,9 @@ software release you used.
 
 > Shirokikh, N. E., Ravindran, A., & Cleynen, A.  *FracFixD: a native-D rewrite of FracFixR for fast compositional fractional fixup and differential proportion testing.*  Zenodo.  https://doi.org/10.5281/zenodo.20234583
 
-**FracFixD v2.0.0 "Quokka" specifically:**
+**FracFixD v2.0.2 "Quokka-2" specifically:**
 
-> Shirokikh, N. E., Ravindran, A., & Cleynen, A. (2026). *Arnaroo/FracFixR: FracFixD v2.0.0 "Quokka".*  Zenodo.  https://doi.org/10.5281/zenodo.20307512
+> Shirokikh, N. E., Ravindran, A., & Cleynen, A. (2026). *Arnaroo/FracFixR: FracFixD v2.0.2 "Quokka-2".*  Zenodo.  https://doi.org/10.5281/zenodo.ZENODO_V202_DOI_PLACEHOLDER
 
 BibTeX:
 
@@ -513,10 +603,10 @@ BibTeX:
                 fast compositional fractional fixup and
                 differential proportion testing}},
   year      = {2026},
-  version   = {2.0.0},
+  version   = {2.0.2},
   publisher = {Zenodo},
-  doi       = {10.5281/zenodo.20307512},
-  url       = {https://doi.org/10.5281/zenodo.20307512}
+  doi       = {10.5281/zenodo.ZENODO_V202_DOI_PLACEHOLDER},
+  url       = {https://doi.org/10.5281/zenodo.ZENODO_V202_DOI_PLACEHOLDER}
 }
 ```
 
