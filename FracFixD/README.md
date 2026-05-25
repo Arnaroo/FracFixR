@@ -579,7 +579,7 @@ software release you used.
 
 **FracFixD v2.0.2 "Quokka-2" specifically:**
 
-> Shirokikh, N. E., Ravindran, A., & Cleynen, A. (2026). *Arnaroo/FracFixR: FracFixD v2.0.2 "Quokka-2".*  Zenodo.  https://doi.org/10.5281/zenodo.ZENODO_V202_DOI_PLACEHOLDER
+> Shirokikh, N. E., Ravindran, A., & Cleynen, A. (2026). *Arnaroo/FracFixR: FracFixD v2.0.2 "Quokka-2".*  Zenodo.  https://doi.org/10.5281/zenodo.20385259
 
 BibTeX:
 
@@ -605,8 +605,8 @@ BibTeX:
   year      = {2026},
   version   = {2.0.2},
   publisher = {Zenodo},
-  doi       = {10.5281/zenodo.ZENODO_V202_DOI_PLACEHOLDER},
-  url       = {https://doi.org/10.5281/zenodo.ZENODO_V202_DOI_PLACEHOLDER}
+  doi       = {10.5281/zenodo.20385259},
+  url       = {https://doi.org/10.5281/zenodo.20385259}
 }
 ```
 
