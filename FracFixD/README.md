@@ -35,7 +35,7 @@ Frac2 / Total × 2 reps`, 205 545 transcripts).
 ### 1 Data tab: load counts + annotation
 
 Drop the two TSVs into the path entries (or use the Browse
-dialogs).  Hit Load — the counts file is parsed in ≈ 95 ms cold
+dialogs).  Hit Load and the counts file is parsed in ≈ 95 ms cold
 (`~80 ms warm via the on-disk parsed-input cache, written
 beside the TSV as `<file>.ffxdcache`).  A determinate
 byte-progress bar and a working Cancel button cover any large
@@ -48,7 +48,7 @@ load.
 ### 2 FracFix tab: compositional fixup
 
 Optional sliders for the FracFixR-1.1.0 `st1 / st2` quantile
-bounds and an auto-profiler override row.  Click Run — the
+bounds and an auto-profiler override row.  Click Run and the
 status line reports the number of per-replicate NNLS fits
 computed.
 
@@ -69,7 +69,7 @@ HC3 sandwich, quasi).
 
 ### 4 Multi-Cond tab: K-condition global test
 
-The detected conditions auto-fill on load — first condition is
+The detected conditions auto-fill on load where first condition is
 the design-matrix baseline.  Pick `lrt` or `wald` for the
 global test, optional comma-separated contrast pairs
 (`Mix1:Mix2,Mix2:Mix3` here).  Companion contrast TSVs land
