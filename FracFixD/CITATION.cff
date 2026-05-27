@@ -28,19 +28,16 @@ keywords:
   - D language
   - LDC
 authors:
-  - family-names: Shirokikh
-    given-names: Nikolay E.
-    orcid: "https://orcid.org/0000-0001-8249-358X"
-    affiliation: "The University of Western Australia"
-    email: "nikolay.shirokikh@uwa.edu.au"
-  - family-names: Ravindran
-    given-names: Agin
-    affiliation: "Arnaroo Ribologicals"
   - family-names: Cleynen
     given-names: Alice
     orcid: "https://orcid.org/0000-0001-8083-0204"
     affiliation: "CNRS, IMAG, Université de Montpellier"
     email: "alice.cleynen@cnrs.fr"
+  - family-names: Shirokikh
+    given-names: Nikolay E.
+    orcid: "https://orcid.org/0000-0001-8249-358X"
+    affiliation: "The Australian Centre for RNA Therapeutics in Cancer, School of Human Sciences, The University of Western Australia"
+    email: "nikolay.shirokikh@uwa.edu.au"
 identifiers:
   - type: doi
     value: "10.5281/zenodo.20234583"
