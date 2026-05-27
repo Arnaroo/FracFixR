@@ -607,7 +607,7 @@ If you use FracFixR in your research, please cite both the software and the acco
 
 **This specific release (v1.0.0.1, snapshot of v1.0.0):**
 
-> Cleynen A, Ravindran A, Shirokikh NE (2026). *Arnaroo/FracFixR: FracFixR v1.0.0.1 — archival re-publish.* Zenodo. https://doi.org/10.5281/zenodo.20234584
+> Cleynen A, Ravindran A, Shirokikh NE (2026). *Arnaroo/FracFixR: FracFixR v1.0.0.1, archival re-publish.* Zenodo. https://doi.org/10.5281/zenodo.20234584
 
 **Accompanying manuscript:**
 
