@@ -35,7 +35,7 @@ Frac2 / Total × 2 reps`, 205 545 transcripts).
 ### 1 Data tab: load counts + annotation
 
 Drop the two TSVs into the path entries (or use the Browse
-dialogs).  Hit Load — the counts file is parsed in ≈ 95 ms cold
+dialogs).  Hit Load and the counts file is parsed in ≈ 95 ms cold
 (`~80 ms warm via the on-disk parsed-input cache, written
 beside the TSV as `<file>.ffxdcache`).  A determinate
 byte-progress bar and a working Cancel button cover any large
