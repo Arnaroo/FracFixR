@@ -577,9 +577,9 @@ software release you used.
 
 > Cleynen, A. & Shirokikh, N. E. *FracFixD: a native-D rewrite of FracFixR for fast compositional fractional fixup and differential proportion testing.*  Zenodo.  https://doi.org/10.5281/zenodo.20234583
 
-**FracFixD v2.0.2 "Quokka-2" specifically:**
+**FracFixD v2.0.3 "Quokka-Static" specifically:**
 
-> Cleynen, A. & Shirokikh, N. E. (2026). *Arnaroo/FracFixR: FracFixD v2.0.2 "Quokka-2".*  Zenodo.  https://doi.org/10.5281/zenodo.20385259
+> Cleynen, A. & Shirokikh, N. E. (2026). *Arnaroo/FracFixR: FracFixD v2.0.3 "Quokka-Static".*  Zenodo.  https://doi.org/10.5281/zenodo.20406113
 
 BibTeX:
 
@@ -603,10 +603,10 @@ BibTeX:
                 fast compositional fractional fixup and
                 differential proportion testing}},
   year      = {2026},
-  version   = {2.0.2},
+  version   = {2.0.3},
   publisher = {Zenodo},
-  doi       = {10.5281/zenodo.20385259},
-  url       = {https://doi.org/10.5281/zenodo.20385259}
+  doi       = {10.5281/zenodo.20406113},
+  url       = {https://doi.org/10.5281/zenodo.20406113}
 }
 ```
 

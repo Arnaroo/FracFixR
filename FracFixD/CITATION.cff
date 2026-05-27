@@ -43,8 +43,11 @@ identifiers:
     value: "10.5281/zenodo.20234583"
     description: "Zenodo concept DOI (all versions, always resolves to the latest release)"
   - type: doi
+    value: "10.5281/zenodo.20406113"
+    description: "Zenodo DOI for FracFixD v2.0.3 'Quokka-Static' (this specific release)"
+  - type: doi
     value: "10.5281/zenodo.20385259"
-    description: "Zenodo DOI for FracFixD v2.0.2 'Quokka-2' (previous release; v2.0.3 version DOI to be minted with this release)"
+    description: "Zenodo DOI for FracFixD v2.0.2 'Quokka-2' (previous release)"
 preferred-citation:
   type: article
   title: "FracFixR: a compositional statistical framework for absolute proportion estimation between fractions in RNA sequencing data"
