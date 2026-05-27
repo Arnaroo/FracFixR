@@ -32,7 +32,7 @@ tour below walks the seven operational tabs on the worked
 3-condition example fixture (`Mix1 / Mix2 / Mix3 × Frac1 /
 Frac2 / Total × 2 reps`, 205 545 transcripts).
 
-### 1 — Data tab: load counts + annotation
+### 1 Data tab: load counts + annotation
 
 Drop the two TSVs into the path entries (or use the Browse
 dialogs).  Hit Load — the counts file is parsed in ≈ 95 ms cold
@@ -45,10 +45,10 @@ load.
   <img src="resources/screenshots/01-data-tab-loaded.png" alt="Data tab — loaded from cache" width="720"/>
 </p>
 
-### 2 — FracFix tab: compositional fixup
+### 2 FracFix tab: compositional fixup
 
 Optional sliders for the FracFixR-1.1.0 `st1 / st2` quantile
-bounds and an auto-profiler override row.  Click Run — the
+bounds and an auto-profiler override row.  Click Run; the
 status line reports the number of per-replicate NNLS fits
 computed.
 
@@ -56,7 +56,7 @@ computed.
   <img src="resources/screenshots/02-fracfix-tab.png" alt="FracFix tab" width="720"/>
 </p>
 
-### 3 — DiffProp tab: pairwise differential proportions
+### 3 DiffProp tab: pairwise differential proportions
 
 Pick condition A / B, fraction type, test route, and the FDR /
 shrinkage / dispersion / sandwich-cluster selectors.  Seven
@@ -67,9 +67,9 @@ HC3 sandwich, quasi).
   <img src="resources/screenshots/03-diffprop-tab.png" alt="DiffProp tab" width="720"/>
 </p>
 
-### 4 — Multi-Cond tab: K-condition global test
+### 4 Multi-Cond tab: K-condition global test
 
-The detected conditions auto-fill on load — first condition is
+The detected conditions auto-fill on load, while the first condition is
 the design-matrix baseline.  Pick `lrt` or `wald` for the
 global test, optional comma-separated contrast pairs
 (`Mix1:Mix2,Mix2:Mix3` here).  Companion contrast TSVs land
@@ -80,7 +80,7 @@ pattern the CLI uses.
   <img src="resources/screenshots/04-multicond-tab.png" alt="Multi-Cond tab" width="720"/>
 </p>
 
-### 5 — Plots tab → Pairwise sub-tab
+### 5 Plots tab → Pairwise sub-tab
 
 Volcano (DiffProp result) + per-sample fractions barplot
 (FracFix result), side by side.  All plots support Ctrl+wheel
@@ -90,7 +90,7 @@ zoom (per-pane) and Ctrl++ / Ctrl+- / Ctrl+0 (all-panes).
   <img src="resources/screenshots/05-plots-pairwise.png" alt="Plots tab — Pairwise sub-tab" width="900"/>
 </p>
 
-### 6 — Plots tab → Multi-Cond sub-tab
+### 6 Plots tab → Multi-Cond sub-tab
 
 Four diagnostic plots from the Multi-Cond result:
 top-left = global-test volcano, top-right = p-value histogram,
@@ -101,7 +101,7 @@ condition-means heatmap.
   <img src="resources/screenshots/06-plots-multicond.png" alt="Plots tab — Multi-Cond sub-tab" width="900"/>
 </p>
 
-### 7 — Log tab: live audit trail
+### 7 Log tab: live audit trail
 
 Every worker log line lands here in append-only form, mirroring
 what would have gone to the `--log FILE` of an equivalent CLI
@@ -387,7 +387,7 @@ A pre-built portable ZIP is shipped alongside the Linux and
 macOS artefacts:
 
 ```powershell
-# PowerShell — download the ZIP
+# PowerShell download the ZIP
 Invoke-WebRequest -Uri https://github.com/Arnaroo/FracFixR/raw/master/FracFixD/bin/fracfixd-v2.0.2-windows-x86_64.zip `
     -OutFile fracfixd-v2.0.2-windows-x86_64.zip
 
@@ -575,11 +575,11 @@ software release you used.
 
 **FracFixD software, all versions (concept DOI, always resolves to the latest release):**
 
-> Shirokikh, N. E., Ravindran, A., & Cleynen, A.  *FracFixD: a native-D rewrite of FracFixR for fast compositional fractional fixup and differential proportion testing.*  Zenodo.  https://doi.org/10.5281/zenodo.20234583
+> Cleynen, A. & Shirokikh, N. E. *FracFixD: a native-D rewrite of FracFixR for fast compositional fractional fixup and differential proportion testing.*  Zenodo.  https://doi.org/10.5281/zenodo.20234583
 
 **FracFixD v2.0.2 "Quokka-2" specifically:**
 
-> Shirokikh, N. E., Ravindran, A., & Cleynen, A. (2026). *Arnaroo/FracFixR: FracFixD v2.0.2 "Quokka-2".*  Zenodo.  https://doi.org/10.5281/zenodo.20385259
+> Cleynen, A. & Shirokikh, N. E. (2026). *Arnaroo/FracFixR: FracFixD v2.0.2 "Quokka-2".*  Zenodo.  https://doi.org/10.5281/zenodo.20385259
 
 BibTeX:
 
@@ -598,7 +598,7 @@ BibTeX:
 }
 
 @software{fracfixd_v2,
-  author    = {Shirokikh, Nikolay E. and Ravindran, Agin and Cleynen, Alice},
+  author    = {Cleynen, Alice and Shirokikh, Nikolay E.},
   title     = {{FracFixD: a native-D rewrite of FracFixR for
                 fast compositional fractional fixup and
                 differential proportion testing}},
