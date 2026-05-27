@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Arnaroo/FracFixR/releases/tag/fracfixd-v2.0.2"><img src="https://img.shields.io/badge/release-v2.0.2%20Quokka--2-blue" alt="release"></a>
+  <a href="https://github.com/Arnaroo/FracFixR/releases/tag/fracfixd-v2.0.3"><img src="https://img.shields.io/badge/release-v2.0.3%20Quokka--Static-blue" alt="release"></a>
   <a href="https://doi.org/10.5281/zenodo.20234583"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20234583-blue" alt="Zenodo DOI"></a>
   <a href="https://doi.org/10.1093/bioinformatics/btaf615"><img src="https://img.shields.io/badge/Bioinformatics-btaf615-blue" alt="Bioinformatics paper"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/binaries-CC--BY--NC--ND--4.0-lightgrey" alt="binaries licence"></a>
@@ -32,10 +32,10 @@ tour below walks the seven operational tabs on the worked
 3-condition example fixture (`Mix1 / Mix2 / Mix3 × Frac1 /
 Frac2 / Total × 2 reps`, 205 545 transcripts).
 
-### 1 Data tab: load counts + annotation
+### 1 — Data tab: load counts + annotation
 
 Drop the two TSVs into the path entries (or use the Browse
-dialogs).  Hit Load and the counts file is parsed in ≈ 95 ms cold
+dialogs).  Hit Load — the counts file is parsed in ≈ 95 ms cold
 (`~80 ms warm via the on-disk parsed-input cache, written
 beside the TSV as `<file>.ffxdcache`).  A determinate
 byte-progress bar and a working Cancel button cover any large
@@ -45,10 +45,10 @@ load.
   <img src="resources/screenshots/01-data-tab-loaded.png" alt="Data tab — loaded from cache" width="720"/>
 </p>
 
-### 2 FracFix tab: compositional fixup
+### 2 — FracFix tab: compositional fixup
 
 Optional sliders for the FracFixR-1.1.0 `st1 / st2` quantile
-bounds and an auto-profiler override row.  Click Run and the
+bounds and an auto-profiler override row.  Click Run — the
 status line reports the number of per-replicate NNLS fits
 computed.
 
@@ -56,7 +56,7 @@ computed.
   <img src="resources/screenshots/02-fracfix-tab.png" alt="FracFix tab" width="720"/>
 </p>
 
-### 3 DiffProp tab: pairwise differential proportions
+### 3 — DiffProp tab: pairwise differential proportions
 
 Pick condition A / B, fraction type, test route, and the FDR /
 shrinkage / dispersion / sandwich-cluster selectors.  Seven
@@ -67,9 +67,9 @@ HC3 sandwich, quasi).
   <img src="resources/screenshots/03-diffprop-tab.png" alt="DiffProp tab" width="720"/>
 </p>
 
-### 4 Multi-Cond tab: K-condition global test
+### 4 — Multi-Cond tab: K-condition global test
 
-The detected conditions auto-fill on load where first condition is
+The detected conditions auto-fill on load — first condition is
 the design-matrix baseline.  Pick `lrt` or `wald` for the
 global test, optional comma-separated contrast pairs
 (`Mix1:Mix2,Mix2:Mix3` here).  Companion contrast TSVs land
@@ -80,7 +80,7 @@ pattern the CLI uses.
   <img src="resources/screenshots/04-multicond-tab.png" alt="Multi-Cond tab" width="720"/>
 </p>
 
-### 5 Plots tab → Pairwise sub-tab
+### 5 — Plots tab → Pairwise sub-tab
 
 Volcano (DiffProp result) + per-sample fractions barplot
 (FracFix result), side by side.  All plots support Ctrl+wheel
@@ -90,7 +90,7 @@ zoom (per-pane) and Ctrl++ / Ctrl+- / Ctrl+0 (all-panes).
   <img src="resources/screenshots/05-plots-pairwise.png" alt="Plots tab — Pairwise sub-tab" width="900"/>
 </p>
 
-### 6 Plots tab → Multi-Cond sub-tab
+### 6 — Plots tab → Multi-Cond sub-tab
 
 Four diagnostic plots from the Multi-Cond result:
 top-left = global-test volcano, top-right = p-value histogram,
@@ -101,7 +101,7 @@ condition-means heatmap.
   <img src="resources/screenshots/06-plots-multicond.png" alt="Plots tab — Multi-Cond sub-tab" width="900"/>
 </p>
 
-### 7 Log tab: live audit trail
+### 7 — Log tab: live audit trail
 
 Every worker log line lands here in append-only form, mirroring
 what would have gone to the `--log FILE` of an equivalent CLI

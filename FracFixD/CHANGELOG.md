@@ -6,6 +6,41 @@ itself.
 
 ---
 
+## v2.0.3 "Quokka-Static" 2026-05-27
+
+Static-linkage fix release for the Linux GUI binaries.  No changes
+to the numeric kernels, the GUI surface, or the CLI subcommand
+interface — equivalence-harness outputs are byte-identical to v2.0.2.
+
+### Highlights
+
+- **Fully static Linux GUI binaries**: `fracfixd-linux-{znver2,
+  broadwell,generic}-x86_64` are now truly statically linked
+  against OpenBLAS (with bundled netlib LAPACK).  `ldd` drops to
+  `libc / libm / libgcc_s` only, matching the long-standing
+  CLI-static variant.  Resolves the v2.0.2 `libopenblas.so.0:
+  cannot open shared object file` failure on hosts without system
+  BLAS / LAPACK installed.
+- **Full LTO + per-microarch tuning preserved**: `--flto=full`,
+  `-O3`, `-boundscheck=off`, `--mcpu={znver2,broadwell,x86-64-v3}`
+  carried across all four Linux release artefacts.  CLI-static
+  rebuilt against the same `DYNAMIC_ARCH=1` OpenBLAS archive for
+  parity.
+- **Numerical regression verified**: same equivalence-harness
+  fixture run with v2.0.2 dynamic and v2.0.3 static CLI binaries
+  produced byte-identical TSV outputs (MD5-equal).  Static
+  linkage is numerically transparent.
+- **`dub.json` build types added**: new `linux-static` config
+  plus four combined build types
+  (`release-{znver2,broadwell,generic}-static` and
+  `release-cli-static-flto`) capture the working static-link
+  line for reproducible re-cuts.
+
+macOS arm64 and Windows x86_64 artefacts from v2.0.2 are carried
+forward unchanged; this fix is Linux-only.
+
+---
+
 ## v2.0.2 "Quokka-2" 2026-05-26
 
 GUI usability + multi-condition visualisation release.  No
