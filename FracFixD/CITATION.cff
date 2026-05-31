@@ -43,6 +43,9 @@ identifiers:
     value: "10.5281/zenodo.20234583"
     description: "Zenodo concept DOI (all versions, always resolves to the latest release)"
   - type: doi
+    value: "10.5281/zenodo.20472304"
+    description: "Zenodo DOI for FracFixD v2.0.6 'Quokka-5' (this release)"
+  - type: doi
     value: "10.5281/zenodo.20406113"
     description: "Zenodo DOI for FracFixD v2.0.3 'Quokka-Static' (previous release)"
   - type: doi
