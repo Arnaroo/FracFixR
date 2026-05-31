@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Arnaroo/FracFixR/releases/tag/fracfixd-v2.0.3"><img src="https://img.shields.io/badge/release-v2.0.3%20Quokka--Static-blue" alt="release"></a>
+  <a href="https://github.com/Arnaroo/FracFixR/releases/tag/fracfixd-v2.0.6"><img src="https://img.shields.io/badge/release-v2.0.6%20Quokka--5-blue" alt="release"></a>
   <a href="https://doi.org/10.5281/zenodo.20234583"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20234583-blue" alt="Zenodo DOI"></a>
   <a href="https://doi.org/10.1093/bioinformatics/btaf615"><img src="https://img.shields.io/badge/Bioinformatics-btaf615-blue" alt="Bioinformatics paper"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/binaries-CC--BY--NC--ND--4.0-lightgrey" alt="binaries licence"></a>
@@ -42,7 +42,7 @@ byte-progress bar and a working Cancel button cover any large
 load.
 
 <p align="center">
-  <img src="resources/screenshots/01-data-tab-loaded.png" alt="Data tab — loaded from cache" width="720"/>
+  <img src="resources/screenshots/01-data-tab-loaded.png" alt="Data tab - loaded from cache" width="720"/>
 </p>
 
 ### 2 FracFix tab: compositional fixup
@@ -87,7 +87,7 @@ Volcano (DiffProp result) + per-sample fractions barplot
 zoom (per-pane) and Ctrl++ / Ctrl+- / Ctrl+0 (all-panes).
 
 <p align="center">
-  <img src="resources/screenshots/05-plots-pairwise.png" alt="Plots tab — Pairwise sub-tab" width="900"/>
+  <img src="resources/screenshots/05-plots-pairwise.png" alt="Plots tab - Pairwise sub-tab" width="900"/>
 </p>
 
 ### 6 Plots tab → Multi-Cond sub-tab
@@ -98,7 +98,7 @@ bottom-left = per-contrast volcano grid, bottom-right = top-N
 condition-means heatmap.
 
 <p align="center">
-  <img src="resources/screenshots/06-plots-multicond.png" alt="Plots tab — Multi-Cond sub-tab" width="900"/>
+  <img src="resources/screenshots/06-plots-multicond.png" alt="Plots tab - Multi-Cond sub-tab" width="900"/>
 </p>
 
 ### 7 Log tab: live audit trail
@@ -109,7 +109,7 @@ invocation.  Useful for translating a GUI session back into a
 reproducible CLI command for a Snakemake / Nextflow rule.
 
 <p align="center">
-  <img src="resources/screenshots/07-log-tab.png" alt="Log tab — full pipeline trace" width="720"/>
+  <img src="resources/screenshots/07-log-tab.png" alt="Log tab - full pipeline trace" width="720"/>
 </p>
 
 ---
@@ -346,7 +346,7 @@ sudo apt-get install libgtk-3-0
 sudo dnf install gtk3
 ```
 
-The CLI mode does not require GTK — `fracfixd --cli` and
+The CLI mode does not require GTK - `fracfixd --cli` and
 `fracfixd-cli-linux-x86_64-static` run on headless hosts with
 no GUI libraries installed at all.
 
@@ -356,14 +356,14 @@ A native arm64 `.dmg` is shipped alongside the Linux binaries:
 
 ```bash
 # Download the .dmg
-curl -fsSL https://github.com/Arnaroo/FracFixR/raw/master/FracFixD/bin/FracFixD-2.0.2-macos-arm64.dmg \
-     -o FracFixD-2.0.2-macos-arm64.dmg
+curl -fsSL https://github.com/Arnaroo/FracFixR/raw/master/FracFixD/bin/FracFixD-2.0.6-macos-arm64.dmg \
+     -o FracFixD-2.0.6-macos-arm64.dmg
 
 # Verify (compare against SHA256SUMS)
-shasum -a 256 FracFixD-2.0.2-macos-arm64.dmg
+shasum -a 256 FracFixD-2.0.6-macos-arm64.dmg
 
 # Mount + install
-open FracFixD-2.0.2-macos-arm64.dmg
+open FracFixD-2.0.6-macos-arm64.dmg
 # Drag FracFixD.app into the Applications symlink.
 ```
 
@@ -377,7 +377,7 @@ xattr -dr com.apple.quarantine /Applications/FracFixD.app
 ```
 
 For CLI / pipeline use, a relocatable tarball is also shipped:
-`fracfixd-2.0.2-macos-arm64.tar.gz`.  Extract and call
+`fracfixd-2.0.6-macos-arm64.tar.gz`.  Extract and call
 `./fracfixd-macos/bin/fracfixd-launcher.sh --cli ...` from any
 location.
 
@@ -388,14 +388,14 @@ macOS artefacts:
 
 ```powershell
 # PowerShell download the ZIP
-Invoke-WebRequest -Uri https://github.com/Arnaroo/FracFixR/raw/master/FracFixD/bin/fracfixd-v2.0.2-windows-x86_64.zip `
-    -OutFile fracfixd-v2.0.2-windows-x86_64.zip
+Invoke-WebRequest -Uri https://github.com/Arnaroo/FracFixR/raw/master/FracFixD/bin/fracfixd-v2.0.6-windows-x86_64.zip `
+    -OutFile fracfixd-v2.0.6-windows-x86_64.zip
 
 # Verify (compare against SHA256SUMS in the same folder)
-Get-FileHash fracfixd-v2.0.2-windows-x86_64.zip -Algorithm SHA256
+Get-FileHash fracfixd-v2.0.6-windows-x86_64.zip -Algorithm SHA256
 
 # Extract anywhere and double-click `fracfixd-windows\fracfixd.exe`
-Expand-Archive fracfixd-v2.0.2-windows-x86_64.zip -DestinationPath .
+Expand-Archive fracfixd-v2.0.6-windows-x86_64.zip -DestinationPath .
 .\fracfixd-windows\fracfixd.exe --cli --version
 ```
 
@@ -407,10 +407,10 @@ works on headless / server hosts; the GUI launches when the
 .exe is double-clicked.
 
 For users who prefer a system-wide install with PATH
-integration and an uninstaller, the source-build recipe in
-[`docs/BUILD_WINDOWS.md`](docs/BUILD_WINDOWS.md) also produces
-an Inno Setup `.exe` installer.  Source-tree access is by
-request (see [*Source code*](#source-code)).
+integration and an uninstaller, the source-build tooling also
+produces an Inno Setup `.exe` installer.  Source-tree access
+and build tooling are provided by request (see
+[*Source code*](#source-code)).
 
 ---
 
@@ -482,9 +482,9 @@ FDR, shrinkage, permutation, QC, output formatting, logging).
 
 ---
 
-## Known limitations in v2.0.2
+## Known limitations in v2.0.6
 
-These are documented up front so you can decide whether v2.0.2
+These are documented up front so you can decide whether v2.0.6
 fits your workflow.
 
 - **x86_64 only on Linux and Windows; arm64 only on macOS.**
@@ -492,9 +492,8 @@ fits your workflow.
   and x86_64 macOS (Intel Macs) are planned for follow-up
   releases.
 - **Windows installer is portable-ZIP only.**  A signed Inno
-  Setup `.exe` installer can be produced from the source tree
-  (see [`docs/BUILD_WINDOWS.md`](docs/BUILD_WINDOWS.md)); the
-  released artefact is the unsigned portable ZIP, so Windows
+  Setup `.exe` installer can be produced from the source tree;
+  the released artefact is the unsigned portable ZIP, so Windows
   SmartScreen may flag it on first launch (click "More info"
   then "Run anyway").
 - **`--bb-step-rule deterministic` ships EXPERIMENTAL.**  On the
@@ -513,9 +512,10 @@ fits your workflow.
   [VX](https://github.com/Arnaroo/VX); for full RNA-seq quant
   pair it with salmon / kallisto upstream.
 
-See [`docs/BUILD_PROVENANCE.md`](docs/BUILD_PROVENANCE.md) for
-the full toolchain, compiler flags, library bundling, and
-verification recipes that produced this release.
+Full build provenance (toolchain, compiler flags, library
+bundling, and verification recipes) accompanies each binary in
+the Zenodo deposit and is available with source-tree access on
+request (see [*Source code*](#source-code)).
 
 ---
 
@@ -529,8 +529,6 @@ proprietary licence (see *Source code* below).
 | Folder | Contents | Licence |
 |---|---|---|
 | [`bin/`](bin/) | Pre-compiled binaries (Linux x86_64 microarch variants + static CLI) + `SHA256SUMS` | **CC-BY-NC-ND-4.0** |
-| [`docs/`](docs/) | Build provenance, per-platform build walk-throughs (Linux, macOS, Windows) | **CC-BY-4.0** |
-| [`installer/`](installer/) | Per-platform packaging scripts (planned: `package-macos.sh`, `applauncher.c`, `package-windows.sh`, Inno Setup `.iss`) | **MIT** |
 | [`resources/`](resources/) | Logo and icons (`logo.svg`, `logo-{64,128,256,512,1024}.png`) | **CC-BY-NC-ND-4.0** |
 | [`CHANGELOG.md`](CHANGELOG.md) | User-facing release notes (see also `fracfixd --changelog`) | **CC-BY-4.0** |
 | [`CITATION.cff`](CITATION.cff) | Citation metadata (CFF 1.2.0) | **CC0-1.0** |
@@ -577,9 +575,9 @@ software release you used.
 
 > Cleynen, A. & Shirokikh, N. E. *FracFixD: a native-D rewrite of FracFixR for fast compositional fractional fixup and differential proportion testing.*  Zenodo.  https://doi.org/10.5281/zenodo.20234583
 
-**FracFixD v2.0.3 "Quokka-Static" specifically:**
+**FracFixD v2.0.6 "Quokka-5" specifically:**
 
-> Cleynen, A. & Shirokikh, N. E. (2026). *Arnaroo/FracFixR: FracFixD v2.0.3 "Quokka-Static".*  Zenodo.  https://doi.org/10.5281/zenodo.20406113
+> Cleynen, A. & Shirokikh, N. E. (2026). *Arnaroo/FracFixR: FracFixD v2.0.6 "Quokka-5".*  Zenodo.  https://doi.org/10.5281/zenodo.20234583
 
 BibTeX:
 
@@ -603,10 +601,10 @@ BibTeX:
                 fast compositional fractional fixup and
                 differential proportion testing}},
   year      = {2026},
-  version   = {2.0.3},
+  version   = {2.0.6},
   publisher = {Zenodo},
-  doi       = {10.5281/zenodo.20406113},
-  url       = {https://doi.org/10.5281/zenodo.20406113}
+  doi       = {10.5281/zenodo.20234583},
+  url       = {https://doi.org/10.5281/zenodo.20234583}
 }
 ```
 
@@ -619,19 +617,15 @@ different software artefacts that implement the same method.
 
 ## Build provenance
 
-For full transparency on how each release binary was produced, 
-compiler version, microarchitecture targeting, LTO and bound-
-check flags, the D-runtime static-linking flow, the GTK3 / BLAS
-runtime dependency profile, and the SHA-256 verification
-recipe, see [`docs/BUILD_PROVENANCE.md`](docs/BUILD_PROVENANCE.md).
+Full build provenance for each release binary, compiler version,
+microarchitecture targeting, LTO and bound-check flags, the
+D-runtime static-linking flow, the GTK3 / BLAS runtime
+dependency profile, and the SHA-256 verification recipe, is
+recorded alongside the binaries in the Zenodo deposit.
 
-For source-build walk-throughs on each platform (intended for
-users with access to the D source tree under a separate
-licence):
-
-- [`docs/BUILD_LINUX.md`](docs/BUILD_LINUX.md)
-- [`docs/BUILD_MACOS.md`](docs/BUILD_MACOS.md)
-- [`docs/BUILD_WINDOWS.md`](docs/BUILD_WINDOWS.md)
+Source-build walk-throughs for each platform (Linux, macOS,
+Windows) are provided to users with access to the D source tree
+under a separate licence (see [*Source code*](#source-code)).
 
 ---
 

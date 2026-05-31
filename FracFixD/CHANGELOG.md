@@ -6,6 +6,80 @@ itself.
 
 ---
 
+## v2.0.6 "Quokka-5" 2026-05-31
+
+Documentation and in-app help release.  No numeric-kernel changes
+versus 2.0.5; analysis output is unchanged on all valid inputs.
+
+### Highlights
+
+- **New in-app Help tab**: the full user guide (tool introduction,
+  GUI tour with screenshots, every CLI subcommand and option, and
+  worked CLI examples) now renders inside the application, baked
+  into the binary, so GUI-only users get the complete reference
+  without a terminal or a browser.
+- **About / License credits updated**: COMPASS (a division of
+  Biocodecs) added to the About credits; the binary licence text
+  now attributes copyright to Biocodecs and Arnaroo Ribologicals.
+- **No surface changes** to commands, file formats, or output;
+  numeric results are byte-identical to v2.0.5.
+- All three platforms rebuilt for v2.0.6: Linux x86_64 microarch
+  variants + static CLI, macOS arm64 .dmg + relocatable tarball,
+  Windows x86_64 portable ZIP.
+
+---
+
+## v2.0.5 "Quokka-4" 2026-05-29
+
+Audit-closeout and equivalence-revalidation release.  Output is
+byte-identical to v2.0.4 on all valid inputs.
+
+### Highlights
+
+- **FracFixR equivalence reconfirmed end-to-end** against FracFixR
+  1.1.0 at manuscript-grade thresholds: `glm` / `logit` Spearman
+  ρ(log₂FC) = 1.0000, and corrected-proportion / normalized-count
+  min Spearman = 1.0000.  Confirms the v2.0.4 pooled-denominator
+  fix collapses the FracFixD-vs-FracFixR proportion scatter onto
+  the y = x diagonal.
+- **Three boundary sanity-checks added** in the differential-
+  proportion path (`extractConditionMatrix`,
+  `extractConditionMatrixMulti`, `runPermutationSweep`): each
+  validates matrix / annotation index bounds eagerly.  No-ops on
+  consistent inputs, so all numeric outputs stay byte-identical to
+  v2.0.4.
+- **No surface changes**: CLI subcommands and options, GTK GUI
+  layout, FFXD1BIN / FFXD1ICA cache formats, and output filenames
+  are unchanged.
+- All three platforms rebuilt for v2.0.5: Linux x86_64 microarch
+  variants + static CLI, macOS arm64 `.dmg` + relocatable tarball,
+  Windows x86_64 portable ZIP + installer.
+
+---
+
+## v2.0.4 "Quokka-3" 2026-05-29
+
+Numeric-correctness fix in the per-transcript correction path,
+identified by Alice Cleynen.  No CLI, GUI, IO, or output-format
+surface changes.
+
+### Highlights
+
+- **Pooled denominator in per-transcript proportions**: the
+  per-transcript proportion now uses the condition-pooled Total
+  (`TotalSum`, summed over all replicate Total columns) as the
+  denominator ceiling, matching FracFixR 1.1.0's
+  `ProcessReplicate()` semantics, instead of the single-replicate
+  Total used previously.  Eliminates a ~3× systematic
+  over-estimate of source-column proportions and the resulting
+  triangular FracFixD-vs-FracFixR scatter.
+- **Total-column proportions unchanged** (filled by a separate
+  stage); NNLS, GLM-IRLS, beta-binomial Wald, FDR, shrinkage, CI
+  and multi-condition paths were already pooled-correct and are
+  bytewise unchanged.
+
+---
+
 ## v2.0.3 "Quokka-Static" 2026-05-27
 
 Static-linkage fix release for the Linux GUI binaries.  No changes
