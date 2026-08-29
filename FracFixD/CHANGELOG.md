@@ -1,8 +1,127 @@
 # FracFixD User-facing Changelog
 
-This file records the release history of FracFixD.  Run
-`fracfixd --changelog` for the same notes from the binary
-itself.
+This file records the release history of FracFixD.  Every binary
+carries a condensed form of these notes: `fracfixd --changelog`
+for the recent entries, `fracfixd --changelog-full` for the whole
+history.  The entries here are the longer ones.
+
+---
+
+## v2.1.0 "Numbat" 2026-08-08
+
+Demo dataset, resampling schemes and zero handling.  Defaults are
+unchanged: v2.0.6 output is reproduced exactly, including the
+permutation p-value stream.  Everything new in this release is
+opt-in.
+
+### Highlights
+
+- **`fracfixd demo`**: writes an embedded 300-transcript,
+  18-library dataset and runs `fracfix`, `diffprop` and `plot`
+  over it, echoing each command so the run can be repeated by
+  hand.  No network access, no arguments, no configuration.
+  `--extract-only` stops after writing the inputs, `--outdir`
+  chooses where they go, and `--test` picks the backend.  The demo
+  runs its `diffprop` step under `--bb-step-rule deterministic` so
+  that it reaches the same conclusions on every architecture; see
+  the note on portability below.  `diffprop` invoked directly is
+  unaffected and still takes the `classic` default.
+- **GUI Use demo data button**: loads the same dataset and fills
+  in the same analysis on every tab, so a first run needs one
+  click rather than a file dialogue.
+- **`--resample {labels,binomial,bootstrap}`**: `labels` stays the
+  default.  `binomial` redraws each sample's successes from the
+  pooled null proportion at its own depth, which lifts the
+  granularity floor that otherwise blocks `p <= 0.05` at three
+  replicates.  `bootstrap` resamples replicates within condition
+  and, because it does not impose the null, reports an interval
+  rather than a p-value: it fills the `log2FC_ci_lo` and
+  `log2FC_ci_hi` columns and leaves `permutation_pvalue` at NaN.
+- **`--resample-ci-level`** sets the confidence level of that
+  interval, 0.95 by default, by the percentile method.
+- **`--zero-handling {drop,partial,pseudo}`** with
+  `--pseudocount`, for transcripts whose pooled Total is empty in
+  at least one column.  `drop` stays the default and matches
+  FracFixR.
+- **Multi-Cond contrasts are prefilled** with the baseline against
+  each other condition, so the per-contrast volcano grid is
+  populated on a first run instead of coming up empty.
+- **The volcano key sits on its own panel.** The key is drawn in
+  the top right of the plot area, where the dashed fold-change
+  cutoff and the gridlines used to run straight through the text.
+  A faint white panel now goes down behind it, so the key reads
+  cleanly while the lines beneath it stay visible. The panel is
+  the same rectangle the label placer already avoided, so no
+  transcript label moves.
+- **`intercept_share` in the QC report**: the fitted intercept
+  divided by the mean pooled Total over the rows that entered the
+  fit.  This is the unobserved weight as the fit sees it, on a
+  scale that compares across replicates and datasets, which the
+  raw intercept does not.  It is reported, not tested: a share
+  near zero means the fit attributes no material to the
+  unobserved component, but a healthy-looking share is not a
+  guarantee.
+- **Graceful exit when GTK is absent** on Linux: the GUI binary
+  now names the headless build and exits, instead of failing in
+  the dynamic loader before `main()` is reached.
+- **Windows ships two executables**, which brings it level with
+  Linux and macOS.  `fracfixd.exe` is the graphical interface and
+  is linked as a graphical subsystem program, so launching it
+  opens no console window behind the interface.  `fracfixd-cli.exe`
+  is the console binary, built without the graphical toolkit, for
+  cmd, PowerShell, servers and CI.  Windows gives a graphical
+  subsystem process no console to write to, so one executable
+  cannot serve both.  `fracfixd.exe --cli ...` consequently prints
+  nothing at an interactive prompt, though redirection to a file
+  still works.
+- **Windows executables carry the application icon** and a version
+  block, so Explorer, the taskbar, Alt-Tab and the uninstaller
+  entry show FracFixD rather than a blank page.
+- **No numerical library is linked or bundled any more.**
+  FracFixD's NNLS, IRLS and L-BFGS-B solvers are written in D and
+  never called into a BLAS, but the build declared OpenBLAS and
+  LAPACK all the same and the packages carried the runtime.  Those
+  declarations are gone, and with them about 12 MB from the Windows
+  ZIP and about 25 MB from the macOS bundle.  Nothing about the
+  numbers changes: the demo writes a byte-identical `diffprop.tsv`
+  on Linux before and after.
+- **Argument errors are reported, not thrown**: a malformed
+  option gives two lines and exit code 2, pointing at
+  `fracfixd help <subcommand>`.
+
+### Portability of the demo
+
+The beta-binomial backend evaluates its special functions at D's
+`real` precision, which the hardware defines: 64 mantissa bits on
+x86, 53 on ARM.  At the fitted optimum that difference is enough to
+change whether the observed information matrix tests as positive
+definite, and a transcript whose matrix fails that test is reported
+with NaN in `pval` and `padj` rather than with a test.  The same
+source therefore leaves a slightly different set of transcripts
+tested on different architectures.
+
+`--bb-step-rule deterministic` runs those functions in `double`
+throughout, which removes most of the difference.  The demo pins
+it, because a published acceptance test has to mean the same thing
+on every machine.  Under it the Linux and macOS builds of this
+release call the same 30 of 300 transcripts at `padj` below 0.05,
+with no transcript called on one and not the other, and disagree
+only in the sixth significant figure of the printed columns.  Their
+`diffprop.tsv` files are therefore not byte-identical, and the demo
+now prints the call count for exactly this reason: compare that,
+not the file hash, across machines.
+
+Analysis defaults are untouched.  `diffprop` invoked directly still
+uses `classic` and reproduces v2.0.6 output exactly.
+
+### Platforms
+
+This release ships on three: Linux x86_64, as three microarchitecture
+tuned graphical binaries plus a static command line binary; macOS on
+Apple Silicon, as a `.app` inside a disk image and as a tarball; and
+Windows x86_64, as a portable ZIP and an installer, each holding both
+executables.  Every artefact is built on its own native host.  There
+is no cross-compilation and no Intel Mac build.
 
 ---
 
@@ -84,7 +203,7 @@ surface changes.
 
 Static-linkage fix release for the Linux GUI binaries.  No changes
 to the numeric kernels, the GUI surface, or the CLI subcommand
-interface — equivalence-harness outputs are byte-identical to v2.0.2.
+interface. Equivalence-harness outputs are byte-identical to v2.0.2.
 
 ### Highlights
 
@@ -118,7 +237,7 @@ forward unchanged; this fix is Linux-only.
 ## v2.0.2 "Quokka-2" 2026-05-26
 
 GUI usability + multi-condition visualisation release.  No
-changes to the numeric kernels — equivalence-harness numbers and
+changes to the numeric kernels, so equivalence-harness numbers and
 CLI output bytes carry over from v2.0.1 unchanged.
 
 ### Highlights
@@ -126,16 +245,16 @@ CLI output bytes carry over from v2.0.1 unchanged.
 - **Multi-condition plots**: four new visualisations for the
   K ≥ 3 / global-test pipeline, surfaced via a Pairwise /
   Multi-Cond sub-notebook inside the [Plots] tab:
-  - **Global test (test stat)** — log₁₀(χ²/Wald) vs −log₁₀(padj),
+  - **Global test (test stat)**: log₁₀(χ²/Wald) vs −log₁₀(padj),
     coloured by significance threshold, top-N labelled.
-  - **p-value histogram** — 50-bin distribution with the cutoff
+  - **p-value histogram**: 50-bin distribution with the cutoff
     drawn in.  Standard diagnostic for any multi-test pipeline:
     uniform = no signal, spike near 0 = real effects, spike near
     1 = test misspecification.
-  - **Per-contrast volcano grid** — one pairwise volcano per
+  - **Per-contrast volcano grid**: one pairwise volcano per
     contrast pair (e.g. `Mix1_vs_Mix2`, `Mix1_vs_Mix3`) tiled in
     a grid so you can see which contrasts drive the global hit.
-  - **Top-N condition-means heatmap** — row z-score (or raw mean)
+  - **Top-N condition-means heatmap**: row z-score (or raw mean)
     proportion per condition for the top-N most-significant
     transcripts; blue/red colour scale, configurable row count.
 - **Plot zoom**: Ctrl+wheel zooms whichever plot pane the cursor
@@ -236,11 +355,6 @@ package.
   to parse on 100k-transcript fixtures.
 - **Native SVG volcano plots** with optional EnhancedVolcano-
   style R reproduction script export.
-
-Source-build instructions for all three platforms ship in
-[`docs/BUILD_LINUX.md`](docs/BUILD_LINUX.md),
-[`docs/BUILD_MACOS.md`](docs/BUILD_MACOS.md) and
-[`docs/BUILD_WINDOWS.md`](docs/BUILD_WINDOWS.md).
 
 ### Equivalence
 

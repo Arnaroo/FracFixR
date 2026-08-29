@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
-    FracFixD logo — fractured-and-reassembled grid.
+    FracFixD logo: fractured and reassembled grid.
 
     Visual analogue of the ASCII banner's motif: a 4x4 tile grid
     whose lower-right 2x2 block has been displaced (fractured),
@@ -8,7 +8,7 @@
     bring the displaced block back into the lattice.
 
     Colour family: Biocodecs brand greens, neutral graphite outline.
-    Strict SVG 1.1 — no <foreignObject>, no SMIL, single <style> block.
+    Strict SVG 1.1: no <foreignObject>, no SMIL, single <style> block.
     Square 512 x 512 viewBox; design re-scales cleanly to any size.
 
     (c) 2026 Biocodecs / Arnaroo Ribologicals / RMODEL.
@@ -18,7 +18,7 @@
      viewBox="0 0 512 512"
      width="512" height="512"
      role="img"
-     aria-label="FracFixD logo — fractured and reassembled grid">
+     aria-label="FracFixD logo, fractured and reassembled grid">
 
   <title>FracFixD</title>
   <desc>Four-by-four tile grid; the lower-right 2x2 sub-block is fractured (translated outward) and re-anchored by three short fix-arrows that point back into the lattice. Brand greens on a transparent background.</desc>

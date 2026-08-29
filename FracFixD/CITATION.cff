@@ -10,8 +10,8 @@ abstract: >
   Designed for polysome profiling, subcellular fractionation,
   monosome/disome profiling, and any other RNA-fractionation assay.
 type: software
-version: "2.0.6"
-date-released: "2026-05-31"
+version: "2.1.0"
+date-released: "2026-08-08"
 license: CC-BY-NC-ND-4.0
 url: "https://github.com/Arnaroo/FracFixR"
 repository-code: "https://github.com/Arnaroo/FracFixR"
@@ -43,8 +43,11 @@ identifiers:
     value: "10.5281/zenodo.20234583"
     description: "Zenodo concept DOI (all versions, always resolves to the latest release)"
   - type: doi
+    value: "10.5281/zenodo.22153182"
+    description: "Zenodo DOI for FracFixD v2.1.0 'Numbat' (this release)"
+  - type: doi
     value: "10.5281/zenodo.20472304"
-    description: "Zenodo DOI for FracFixD v2.0.6 'Quokka-5' (this release)"
+    description: "Zenodo DOI for FracFixD v2.0.6 'Quokka-5' (previous release)"
   - type: doi
     value: "10.5281/zenodo.20406113"
     description: "Zenodo DOI for FracFixD v2.0.3 'Quokka-Static' (previous release)"

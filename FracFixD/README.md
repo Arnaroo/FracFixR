@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Arnaroo/FracFixR/releases/tag/fracfixd-v2.0.6"><img src="https://img.shields.io/badge/release-v2.0.6%20Quokka--5-blue" alt="release"></a>
+  <a href="https://github.com/Arnaroo/FracFixR/releases/tag/fracfixd-v2.1.0"><img src="https://img.shields.io/badge/release-v2.1.0%20Numbat-blue" alt="release"></a>
   <a href="https://doi.org/10.5281/zenodo.20234583"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20234583-blue" alt="Zenodo DOI"></a>
   <a href="https://doi.org/10.1093/bioinformatics/btaf615"><img src="https://img.shields.io/badge/Bioinformatics-btaf615-blue" alt="Bioinformatics paper"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/binaries-CC--BY--NC--ND--4.0-lightgrey" alt="binaries licence"></a>
@@ -131,7 +131,7 @@ less well:
 1. **Pipeline authors** building Snakemake / Nextflow / SLURM
    workflows who want a *single dropped-in binary* with no R
    install, no library version negotiation, no `renv.lock`
-   shipping alongside the workflow.  The static CLI is a 1.9 MB
+   shipping alongside the workflow.  The static CLI is a 2.5 MB
    executable that produces the same proportion fits and
    differential-proportion p-values FracFixR does.
 2. **High-throughput / cluster users** running ten-thousand to
@@ -170,8 +170,8 @@ for you.
 |---|---|
 | **Native-D, LDC-compiled inner loops** | NNLS, IRLS (binomial GLM), L-BFGS-B (beta-binomial), and the Wald / score / sandwich variants all run as compiled native code with `-O3 --flto=full -boundscheck=off`.  Per-transcript fits are dispatched across CPU cores via `std.parallelism.taskPool`. |
 | **Microarchitecture-tuned release builds** | Three Linux x86_64 binaries ship out of the box: `znver2` (Zen 2 Ryzen 3000/4000/5000), `broadwell` (Intel 5th-gen onward), and `generic` (x86-64-v3 baseline; runs on most 2013+ CPUs).  Pick the one that matches your cluster's silicon. |
-| **Single binary, GUI + CLI** | One executable.  Run with no arguments → GTK3 GUI launches.  Run with `--cli` or any subcommand → headless console mode.  Same code path under the hood. |
-| **Self-contained static CLI** | The `fracfixd-cli-linux-x86_64-static` artefact links the D runtime statically and depends only on libc + libblas at runtime.  1.9 MB.  Perfect for container images and HPC node-locals. |
+| **One code path, GUI and CLI** | Linux and macOS ship a single executable: run it with no arguments → GTK3 GUI launches; run it with `--cli` or any subcommand → headless console mode.  Windows ships two, because a Windows graphical process is given no console to write to, so `fracfixd.exe` opens the interface and `fracfixd-cli.exe` serves cmd and PowerShell.  Same code path under the hood in every case. |
+| **Self-contained static CLI** | The `fracfixd-cli-linux-x86_64-static` artefact links the D runtime statically and depends only on the C runtime: `libc`, `libm`, `libgcc_s` and the loader.  2.5 MB.  Perfect for container images and HPC node-locals. |
 | **Caching pipeline** | `fracfix --cache-fits FILE.cache` saves the per-replicate NNLS fits + proportions matrix; `diffprop --from-cache FILE.cache` skips the entire fixup step.  Same statistical output, ~10× faster re-runs when you only need to vary the diff-prop knobs. |
 | **Native binary proportions format** | `--out-proportions-bin FILE.bin` writes the FFXD1BIN packed-double format; `diffprop --norm FILE.bin` parses it ~30× faster than the equivalent TSV. |
 | **Deterministic step rule for SIMD reproducibility** | `--bb-step-rule deterministic` opts the beta-binomial fitter into a basin-desensitised L-BFGS-B variant with pure-double special functions, reproducible across CPU microarchitectures and SIMD widths. |
@@ -200,6 +200,9 @@ below for the numerical-agreement contract.
   asymptotic and permutation tests.
 - **`fracfixd plot:`** volcano SVG renderer with optional R
   reproduction script.
+- **`fracfixd demo:`** runs all three of the above over a worked
+  example that ships inside the binary.  No arguments, no data, no
+  network.
 - **`fracfixd help [SUBCOMMAND]:`** detailed per-subcommand help
   and changelog.
 
@@ -301,54 +304,149 @@ behaviour.
 
 ---
 
-## Quick install (Linux)
+## Install
+
+### Which build do I want
+
+No artefact needs a numerical library. FracFixD implements its own NNLS,
+IRLS and L-BFGS-B in D, so no BLAS or LAPACK is called on any platform,
+none is bundled, and none has to be installed. `objdump -p` on the
+Windows binaries and `readelf -d` on the Linux ones both bear this out:
+the only libraries named are the C runtime and, for the graphical
+builds, GTK.
+
+The one real distinction is the graphical interface.
+
+| Build | Graphical interface | Needs GTK 3 present | Use it for |
+|---|---|---|---|
+| `fracfixd-linux-*-x86_64` | yes | yes, always | desktops and laptops |
+| `fracfixd-cli-linux-x86_64-static` | no | no | servers, clusters, containers, CI |
+| macOS `.app` or tarball | yes | no, GTK is bundled | any Mac |
+| Windows ZIP, `fracfixd.exe` | yes | no, GTK is bundled | any Windows host |
+| Windows ZIP, `fracfixd-cli.exe` | no | no | Windows servers, clusters, CI |
+
+There are three ways to run FracFixD, and the second one surprises
+people:
+
+1. `fracfixd` with no arguments opens the graphical interface.
+2. `fracfixd --cli ...` runs the command line pipeline from the same
+   binary. **On Linux this still requires GTK 3**, because the
+   graphical toolkit is loaded while the process starts, before any
+   argument is read. This is why `fracfixd --version` fails on a
+   headless host. **On Windows this prints nothing at all**, because
+   `fracfixd.exe` is a graphical subsystem program and Windows gives
+   such a program no console to write to. Redirection still works, so
+   `fracfixd.exe --cli --version > out.txt` fills the file normally.
+3. `fracfixd-cli`, and `fracfixd-cli.exe` on Windows, is built without
+   the graphical interface at all and requires nothing beyond the C
+   library.
+
+On a Linux host with no GTK 3 the GUI capable build stops immediately
+and says so, naming the headless build. If you are installing on a
+cluster or in a container, take the static CLI and skip GTK entirely.
+
+### Linux: what is actually required
+
+Measured with `ldd` on the published Linux artefacts.
+
+**Linked at load time, every Linux artefact:**
+
+| Library | Provided by |
+|---|---|
+| `libc.so.6` | glibc |
+| `libm.so.6` | glibc |
+| `libgcc_s.so.1` | GCC runtime, present on every distribution |
+
+That is the whole list. No BLAS or LAPACK appears because none is
+called: the solvers are written in D and compiled into the binary.
+
+**glibc floor: 2.34.** The binaries carry versioned symbol references
+up to `GLIBC_2.34`, so an older glibc cannot load them. Check yours:
+
+```bash
+ldd --version | head -1
+```
+
+| Distribution | glibc | Runs the published binaries |
+|---|---|---|
+| Ubuntu 22.04 and later | 2.35+ | yes |
+| Debian 12 and later | 2.36+ | yes |
+| RHEL, Rocky, Alma 9 | 2.34 | yes |
+| Fedora 35 and later | 2.34+ | yes |
+| Arch, Manjaro | current | yes |
+| Ubuntu 20.04 | 2.31 | no |
+| RHEL, CentOS 8 | 2.28 | no |
+
+On a host below the floor, build from source against the local glibc.
+
+**Loaded on demand, GUI capable builds only.** GTK is opened by name at
+process start rather than linked, so it never shows up in `ldd`. Eleven
+libraries must be resolvable:
+
+```
+libgtk-3.so.0          libgdk-3.so.0           libgobject-2.0.so.0
+libglib-2.0.so.0       libgio-2.0.so.0         libgmodule-2.0.so.0
+libgdk_pixbuf-2.0.so.0 libpango-1.0.so.0       libpangocairo-1.0.so.0
+libcairo.so.2          libatk-1.0.so.0
+```
+
+All ten of the others are dependencies of `libgtk-3.so.0`, so a single
+package pulls the set in. Tested against GTK 3.24. Any GTK 3.22 or
+later should work; GTK 4 is not a substitute.
+
+```bash
+# Arch, Manjaro
+sudo pacman -S gtk3
+
+# Ubuntu, Debian
+sudo apt-get install libgtk-3-0
+
+# Fedora, RHEL
+sudo dnf install gtk3
+```
+
+Check whether your host already qualifies:
+
+```bash
+ldconfig -p | grep -c libgtk-3.so.0     # 1 or more means yes
+```
+
+### Quick install (Linux)
 
 Pick the binary that matches your CPU and drop it on your
 `$PATH`:
 
 ```bash
 # AMD Zen 2 / 3 / 4 (Ryzen 3000+, EPYC Rome / Milan / Genoa)
-curl -fsSL https://github.com/Arnaroo/FracFixR/raw/master/FracFixD/bin/fracfixd-linux-znver2-x86_64 \
+curl -fsSL https://github.com/Arnaroo/FracFixR/raw/main/FracFixD/bin/fracfixd-linux-znver2-x86_64 \
      -o /usr/local/bin/fracfixd && chmod +x /usr/local/bin/fracfixd
 
 # Intel Broadwell or newer (i5 / i7 5th-gen+, Xeon E5 v4+)
-curl -fsSL https://github.com/Arnaroo/FracFixR/raw/master/FracFixD/bin/fracfixd-linux-broadwell-x86_64 \
+curl -fsSL https://github.com/Arnaroo/FracFixR/raw/main/FracFixD/bin/fracfixd-linux-broadwell-x86_64 \
      -o /usr/local/bin/fracfixd && chmod +x /usr/local/bin/fracfixd
 
 # Generic x86-64-v3 baseline (runs on most 2013+ CPUs)
-curl -fsSL https://github.com/Arnaroo/FracFixR/raw/master/FracFixD/bin/fracfixd-linux-generic-x86_64 \
+curl -fsSL https://github.com/Arnaroo/FracFixR/raw/main/FracFixD/bin/fracfixd-linux-generic-x86_64 \
      -o /usr/local/bin/fracfixd && chmod +x /usr/local/bin/fracfixd
 
 # Static CLI (no GUI, minimal runtime deps; ideal for containers / HPC)
-curl -fsSL https://github.com/Arnaroo/FracFixR/raw/master/FracFixD/bin/fracfixd-cli-linux-x86_64-static \
+curl -fsSL https://github.com/Arnaroo/FracFixR/raw/main/FracFixD/bin/fracfixd-cli-linux-x86_64-static \
      -o /usr/local/bin/fracfixd-cli && chmod +x /usr/local/bin/fracfixd-cli
 ```
+
+On a server or cluster, take the static CLI and nothing else. It is
+under 3 MB, needs no GTK and no BLAS, and runs the identical analysis
+code.
 
 Verify the download:
 
 ```bash
-sha256sum -c <(curl -fsSL https://github.com/Arnaroo/FracFixR/raw/master/FracFixD/bin/SHA256SUMS)
-fracfixd --version
+sha256sum -c <(curl -fsSL https://github.com/Arnaroo/FracFixR/raw/main/FracFixD/bin/SHA256SUMS)
+fracfixd-cli --version
 ```
 
-**GUI requirements** (only needed for double-click / no-flag
-launch): GTK 3 (`libgtk-3-0`) at runtime.  Install via your
-distro's package manager:
-
-```bash
-# Arch / Manjaro
-sudo pacman -S gtk3
-
-# Ubuntu / Debian
-sudo apt-get install libgtk-3-0
-
-# Fedora / RHEL
-sudo dnf install gtk3
-```
-
-The CLI mode does not require GTK - `fracfixd --cli` and
-`fracfixd-cli-linux-x86_64-static` run on headless hosts with
-no GUI libraries installed at all.
+`SHA256SUMS` covers every published artefact, so the same command
+verifies the macOS and Windows packages.
 
 ### macOS (arm64)
 
@@ -356,14 +454,14 @@ A native arm64 `.dmg` is shipped alongside the Linux binaries:
 
 ```bash
 # Download the .dmg
-curl -fsSL https://github.com/Arnaroo/FracFixR/raw/master/FracFixD/bin/FracFixD-2.0.6-macos-arm64.dmg \
-     -o FracFixD-2.0.6-macos-arm64.dmg
+curl -fsSL https://github.com/Arnaroo/FracFixR/raw/main/FracFixD/bin/FracFixD-2.1.0-macos-arm64.dmg \
+     -o FracFixD-2.1.0-macos-arm64.dmg
 
 # Verify (compare against SHA256SUMS)
-shasum -a 256 FracFixD-2.0.6-macos-arm64.dmg
+shasum -a 256 FracFixD-2.1.0-macos-arm64.dmg
 
 # Mount + install
-open FracFixD-2.0.6-macos-arm64.dmg
+open FracFixD-2.1.0-macos-arm64.dmg
 # Drag FracFixD.app into the Applications symlink.
 ```
 
@@ -376,10 +474,55 @@ Terminal:
 xattr -dr com.apple.quarantine /Applications/FracFixD.app
 ```
 
-For CLI / pipeline use, a relocatable tarball is also shipped:
-`fracfixd-2.0.6-macos-arm64.tar.gz`.  Extract and call
+For CLI and pipeline use, a relocatable tarball is also shipped:
+`fracfixd-2.1.0-macos-arm64.tar.gz`.  Extract and call
 `./fracfixd-macos/bin/fracfixd-launcher.sh --cli ...` from any
 location.
+
+#### macOS dependencies: nothing to install
+
+**You do not need Homebrew to run FracFixD on macOS.** The `.app` and
+the tarball carry 35 dynamic libraries in their own `lib/` directory,
+covering the whole closure:
+
+| Group | Bundled |
+|---|---|
+| Toolkit | the full GTK 3.24 stack: GTK, GDK, GLib, GObject, GIO, Pango, Cairo, ATK, gdk-pixbuf, HarfBuzz, Fontconfig, FreeType |
+| X11 | `libX11.6`, `libXrender.1`, `libXext.6`, `libxcb.1`, `libXau.6`, `libXdmcp.6` |
+
+Nothing resolves against `/opt/homebrew` or `/usr/local` at runtime.
+
+The launcher exists to point the loader at that directory, and it is
+the whole of the mechanism:
+
+```bash
+#!/bin/bash
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LIBDIR="$(cd "$HERE/../lib" && pwd)"
+export DYLD_LIBRARY_PATH="$LIBDIR${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}"
+exec "$HERE/fracfixd" "$@"
+```
+
+So call the launcher rather than `bin/fracfixd` directly. If you do
+call the binary directly, set the path yourself:
+
+```bash
+export DYLD_LIBRARY_PATH=/path/to/fracfixd-macos/lib:$DYLD_LIBRARY_PATH
+/path/to/fracfixd-macos/bin/fracfixd --cli --version
+```
+
+Inside the `.app` the equivalent path is
+`FracFixD.app/Contents/Resources/lib`, and the bundle wires this up
+itself, so double clicking needs no setup.
+
+Homebrew is required only to build from source:
+
+```bash
+brew install dub gtk+3 dylibbundler pkg-config
+```
+
+Minimum macOS 13 (Ventura). Apple Silicon only; Intel Macs are not
+covered by the published artefact.
 
 ### Windows (x86_64)
 
@@ -388,29 +531,147 @@ macOS artefacts:
 
 ```powershell
 # PowerShell download the ZIP
-Invoke-WebRequest -Uri https://github.com/Arnaroo/FracFixR/raw/master/FracFixD/bin/fracfixd-v2.0.6-windows-x86_64.zip `
-    -OutFile fracfixd-v2.0.6-windows-x86_64.zip
+Invoke-WebRequest -Uri https://github.com/Arnaroo/FracFixR/raw/main/FracFixD/bin/fracfixd-v2.1.0-windows-x86_64.zip `
+    -OutFile fracfixd-v2.1.0-windows-x86_64.zip
 
 # Verify (compare against SHA256SUMS in the same folder)
-Get-FileHash fracfixd-v2.0.6-windows-x86_64.zip -Algorithm SHA256
+Get-FileHash fracfixd-v2.1.0-windows-x86_64.zip -Algorithm SHA256
 
 # Extract anywhere and double-click `fracfixd-windows\fracfixd.exe`
-Expand-Archive fracfixd-v2.0.6-windows-x86_64.zip -DestinationPath .
-.\fracfixd-windows\fracfixd.exe --cli --version
+Expand-Archive fracfixd-v2.1.0-windows-x86_64.zip -DestinationPath .
+.\fracfixd-windows\fracfixd-cli.exe --version
 ```
 
-The ZIP bundles the binary plus the full GTK 3 + OpenBLAS +
-gfortran runtime closure (around 70 DLLs), so it runs as a
-drop-in folder on any Windows 10/11 x86_64 host with no
-additional installation.  CLI mode (`fracfixd.exe --cli ...`)
-works on headless / server hosts; the GUI launches when the
-.exe is double-clicked.
+The ZIP is about 27 MB and bundles two executables together with their
+whole runtime closure, about forty-seven DLLs: GTK 3.24 and the MinGW C
+runtime. It runs as a self contained folder on any Windows 10 or 11
+x86_64 host with nothing else installed. No Visual C++ redistributable
+is needed. Only `fracfixd.exe` uses those DLLs; `fracfixd-cli.exe`
+imports nothing but Windows system libraries and will run on its own.
+
+`fracfixd-cli.exe` is the console binary, and the one to use from cmd,
+PowerShell, a batch script or a scheduled job on a headless or server
+host. `fracfixd.exe` opens the graphical interface and writes nothing
+to a console, because Windows gives a graphical subsystem program no
+console at all. That is why the two are separate files.
 
 For users who prefer a system-wide install with PATH
 integration and an uninstaller, the source-build tooling also
 produces an Inno Setup `.exe` installer.  Source-tree access
 and build tooling are provided by request (see
 [*Source code*](#source-code)).
+
+### Platforms the release was tested on
+
+| Platform | Version | Build exercised |
+|---|---|---|
+| Manjaro Linux, x86_64 | rolling, glibc 2.43 | GUI and static CLI |
+| macOS, Apple Silicon | 26.2 (Tahoe) | `.app` and tarball |
+| Windows 11, x86_64 | build 22631 | portable ZIP |
+
+Every artefact is compiled with LDC 1.42.0 and DUB 1.41.0. The Linux
+binaries are built on Linux, and the macOS and Windows packages on
+their native hosts.
+
+### Library versions built against
+
+| Component | Linux | macOS | Windows |
+|---|---|---|---|
+| GTK | 3.24, from the host | 3.24.52, bundled | 3.24.51, bundled |
+| glibc floor | 2.34 | not applicable | not applicable |
+
+GTK is the only external library on the list because it is the only one
+FracFixD links. There is no BLAS row.
+
+Resolved D package versions, pinned in `dub.selections.json`:
+
+| Package | Version | | Package | Version |
+|---|---|---|---|---|
+| gtk-d | 3.10.0 | | mir-core | 1.7.4 |
+| mir-algorithm | 3.22.4 | | mir-linux-kernel | 1.2.1 |
+| mir-random | 2.2.20 | | | |
+
+---
+
+## Try it with no data of your own
+
+```bash
+fracfixd demo
+```
+
+That is the whole command.  A 300-transcript, 18-library example is
+compiled into the binary, so there is nothing to download and nothing
+to configure; the demo runs offline on a machine that has never seen
+FracFixD before.  It writes the inputs to `./fracfixd-demo`, runs the
+three pipeline steps over them, and echoes each command line as it
+goes, so you can lift any step out and repeat it by hand.
+
+The dataset is a simulated polysome profiling experiment: two
+conditions (WT, KO), three replicates, three fractions (Total,
+Monosome, Polysome).  It is simulated forward through the model
+FracFixR assumes, and a designated set of transcripts really does
+change its polysome share, with the signs chosen so the net polysomal
+mass moved is close to zero.  That last detail matters more than it
+sounds: the correction step fits one set of recovery coefficients per
+replicate across all transcripts, so a planted set that is unbalanced
+drags every other transcript's estimate along with it.
+
+Eight files land in `fracfixd-demo/`: the two inputs, the corrected
+`proportions.tsv`, a per-replicate `qc-report.tsv`, the per-transcript
+`diffprop.tsv`, two SVG plots, and a `README.txt` that explains every
+output column and repeats the three commands so the folder still makes
+sense when you come back to it.
+
+Useful variations:
+
+```bash
+# Write the inputs and stop, then drive the pipeline yourself.
+fracfixd demo --extract-only --outdir my-first-run
+
+# Somewhere other than ./fracfixd-demo
+fracfixd demo --outdir /tmp/scratch
+
+# Swap the differential backend.
+fracfixd demo --test glm
+```
+
+The last one is worth running.  The default `wald` route is a
+beta-binomial with an overdispersion parameter and calls 30 of the 300
+transcripts; `glm` is a plain binomial and calls 106.  The extra hits
+are not a discovery, they are the binomial refusing to believe that
+three replicates disagree.  The estimated proportion carries noise
+from the fraction libraries as well as from the Total, and a plain
+binomial has nowhere to put it.  This is the reason `wald` is the
+default.
+
+GUI users get the same run from the **Use demo data** button on the Data
+tab.  It writes the dataset to `fracfixd-demo` in your home folder, loads
+it, and fills in every parameter, leaving two buttons to press: **Run
+FracFix**, then **Run DiffProp**.  Those two clicks are not laziness on
+our part.  The pipeline has two stages for a reason, and watching the
+correction complete before the test begins is the shortest way to see
+why.
+
+The GUI and the CLI read the same parameters from the same place in the
+source, so on one machine both produce a byte-identical `diffprop.tsv`.
+This is worth a sentence because it is not automatic: the annotation
+reader returns conditions and fractions in alphabetical order, so a GUI
+that simply took the first of each would run KO against WT on the
+monosome, and report the mirror image of a different comparison without
+complaining.
+
+Across machines the file is not byte-identical, and the demo prints the
+number it is safe to compare instead.  The beta-binomial backend
+evaluates its special functions at D's `real` precision, which the
+hardware defines: 64 mantissa bits on x86, 53 on ARM.  The demo pins
+`--bb-step-rule deterministic`, which runs them in `double` throughout
+and removes almost all of that difference, but not the last digit of
+the six the output carries.  The Linux and macOS builds of this release
+call the same 30 of 300 transcripts at `padj` below 0.05, with no
+transcript called on one and not the other, and differ in 232 of 5100
+printed cells.  So compare the count the demo prints, not the file
+hash.  `diffprop` invoked directly is unaffected: it still takes the
+`classic` default.
 
 ---
 
@@ -476,15 +737,50 @@ fracfixd-cli diffprop \
     --threads 16 --progress --quiet
 ```
 
+Two families of option were added in v2.1.0.  Both are opt-in and
+both leave the default output byte identical to v2.0.6.
+
+```bash
+# How the permutation null is built.  Takes effect only when
+# --permutation N is given.  labels is the default and reshuffles
+# the condition assignment; at three replicates per condition that
+# leaves ten distinct assignments, so no p-value below 0.05 is
+# attainable.  binomial redraws each sample's successes from the
+# pooled null proportion at its own depth and lifts that floor.
+fracfixd diffprop ... --permutation 2000 --resample binomial
+
+# bootstrap resamples replicates within condition and returns an
+# interval instead of a p-value, because it does not impose the null.
+fracfixd diffprop ... --permutation 2000 \
+    --resample bootstrap --resample-ci-level 0.95
+
+# What to do with a transcript whose pooled Total is empty in at
+# least one (condition, replicate) column.  drop is the default and
+# matches FracFixR.  partial fits on the samples that do have data,
+# provided at least three survive.
+fracfixd diffprop ... --zero-handling partial
+fracfixd diffprop ... --zero-handling pseudo --pseudocount 0.5
+```
+
+`--resample bootstrap` fills the `log2FC_ci_lo` and `log2FC_ci_hi`
+columns and leaves `permutation_pvalue` at NaN.  `--resample-ci-level L`
+sets the confidence level for that interval, 0.95 by default, by the
+percentile method with the (N+1) plotting position.
+
+The QC report written by `fracfixd fracfix --qc-report FILE` gained an
+`intercept_share` column in the same release: the fitted intercept
+divided by the mean pooled Total over the rows that entered the fit,
+reported as a diagnostic and not tested against any threshold.
+
 See `fracfixd help diffprop` for the full flag inventory
 (roughly 50 options grouped by purpose, including testing, dispersion,
 FDR, shrinkage, permutation, QC, output formatting, logging).
 
 ---
 
-## Known limitations in v2.0.6
+## Known limitations
 
-These are documented up front so you can decide whether v2.0.6
+These are documented up front so you can decide whether FracFixD
 fits your workflow.
 
 - **x86_64 only on Linux and Windows; arm64 only on macOS.**
@@ -502,10 +798,26 @@ fits your workflow.
   φ-boundary transcripts where the deterministic kernel finds a
   legitimately different (often better) MLE than classic.
   Default classic mode is the recommended setting.
-- **Runtime dependencies** are the system OpenBLAS / LAPACK /
-  gfortran / GTK3.  Available on every standard Linux install
-  with R, scientific Python, or GNU Octave already present.
-  The static CLI variant drops the LAPACK / GTK3 deps.
+- **The Linux GUI build needs GTK 3 even in CLI mode.**  The
+  toolkit is loaded while the process starts, before any argument
+  is read, so `fracfixd --cli` and even `fracfixd --version` need
+  GTK 3 present.  On a host without it the binary stops at once
+  and names the headless build.  Use
+  `fracfixd-cli-linux-x86_64-static` on servers and clusters: it
+  has no GTK dependency and no BLAS dependency.  See
+  [*Install*](#install).
+- **`fracfixd.exe` prints nothing to a Windows console.**  It is
+  linked as a graphical subsystem program, so launching it opens
+  no console window, and Windows correspondingly gives it no
+  console to write to.  `fracfixd.exe --cli --version` therefore
+  appears to do nothing when typed at a prompt.  Redirection is
+  unaffected, so `fracfixd.exe --cli --version > out.txt` fills
+  the file as expected, which is worth knowing because it
+  otherwise looks inconsistent.  Use `fracfixd-cli.exe` for
+  interactive command line work.
+- **Linux binaries need glibc 2.34 or later.**  RHEL 8 and
+  Ubuntu 20.04 are below the floor and require a build from
+  source.
 - **No Hi-C / multi-omic extensions.**  FracFixD is single-purpose:
   compositional fractional fixup + differential-proportion
   testing.  For genome or transcriptome browser visualisation pair it with
@@ -528,8 +840,8 @@ proprietary licence (see *Source code* below).
 
 | Folder | Contents | Licence |
 |---|---|---|
-| [`bin/`](bin/) | Pre-compiled binaries (Linux x86_64 microarch variants + static CLI) + `SHA256SUMS` | **CC-BY-NC-ND-4.0** |
-| [`resources/`](resources/) | Logo and icons (`logo.svg`, `logo-{64,128,256,512,1024}.png`) | **CC-BY-NC-ND-4.0** |
+| [`bin/`](bin/) | Pre-compiled binaries for all three platforms (Linux x86_64 microarchitecture variants and static CLI, macOS arm64 `.dmg` and tarball, Windows x86_64 portable ZIP holding both the graphical and the console executable) plus `SHA256SUMS` | **CC-BY-NC-ND-4.0** |
+| [`resources/`](resources/) | Logo and icons (`logo.svg`, `logo-{64,128,256,512,1024}.png`, `fracfixd-icon.ico`) and the `screenshots/` used by the GUI tour above | **CC-BY-NC-ND-4.0** |
 | [`CHANGELOG.md`](CHANGELOG.md) | User-facing release notes (see also `fracfixd --changelog`) | **CC-BY-4.0** |
 | [`CITATION.cff`](CITATION.cff) | Citation metadata (CFF 1.2.0) | **CC0-1.0** |
 | [`LICENSE`](LICENSE) | Binary licence text (CC-BY-NC-ND-4.0) | **CC-BY-NC-ND-4.0** |
@@ -575,9 +887,9 @@ software release you used.
 
 > Cleynen, A. & Shirokikh, N. E. *FracFixD: a native-D rewrite of FracFixR for fast compositional fractional fixup and differential proportion testing.*  Zenodo.  https://doi.org/10.5281/zenodo.20234583
 
-**FracFixD v2.0.6 "Quokka-5" specifically:**
+**FracFixD v2.1.0 "Numbat" specifically:**
 
-> Cleynen, A. & Shirokikh, N. E. (2026). *Arnaroo/FracFixR: FracFixD v2.0.6 "Quokka-5".*  Zenodo.  https://doi.org/10.5281/zenodo.20472304
+> Cleynen, A. & Shirokikh, N. E. (2026). *Arnaroo/FracFixR: FracFixD v2.1.0 "Numbat".*  Zenodo.  https://doi.org/10.5281/zenodo.22153182
 
 BibTeX:
 
@@ -601,10 +913,10 @@ BibTeX:
                 fast compositional fractional fixup and
                 differential proportion testing}},
   year      = {2026},
-  version   = {2.0.6},
+  version   = {2.1.0},
   publisher = {Zenodo},
-  doi       = {10.5281/zenodo.20472304},
-  url       = {https://doi.org/10.5281/zenodo.20472304}
+  doi       = {10.5281/zenodo.22153182},
+  url       = {https://doi.org/10.5281/zenodo.22153182}
 }
 ```
 
@@ -619,8 +931,8 @@ different software artefacts that implement the same method.
 
 Full build provenance for each release binary, compiler version,
 microarchitecture targeting, LTO and bound-check flags, the
-D-runtime static-linking flow, the GTK3 / BLAS runtime
-dependency profile, and the SHA-256 verification recipe, is
+D-runtime static-linking flow, the GTK3 runtime dependency
+profile, and the SHA-256 verification recipe, is
 recorded alongside the binaries in the Zenodo deposit.
 
 Source-build walk-throughs for each platform (Linux, macOS,
