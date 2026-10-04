@@ -7,6 +7,61 @@ history.  The entries here are the longer ones.
 
 ---
 
+## v2.1.1 "Numbat" 2026-09-25
+
+Corrections found while revising the paper that describes FracFixD.
+The proportions, the normalised counts and the test results are
+unchanged: v2.1.0 output is reproduced exactly outside the items
+below.
+
+### Fixes
+
+- **Global weights divide by the pooled Total.**  A replicate's
+  global fraction weights, kept with its fits by `--cache-fits`,
+  divided by the replicate's own first Total library.  FracFixR
+  divides by the condition's pooled Total, so wherever a condition
+  had more than one Total library every weight was too large, about
+  twofold with two.  They now match FracFixR 1.1.0.
+- **Intervals count trials from the pooled Total.**  `--ci-method`
+  intervals took their trial counts from the replicate's own Total,
+  while the proportions they bracket divide by the pooled one, and a
+  transcript with no reads in its replicate's own Total got no
+  interval.  Both now use the pooled Total.
+- **The QC report follows the training window.**  `intercept_share`
+  and the condition number were computed on the default window, 0.6
+  to 0.999, whatever `--st1` and `--st2` said.  They now use the
+  window of the fit.
+- **`--threads N` sets the number of threads.**  It had set only the
+  size of the work chunks, and every run took all cores.  Output is
+  identical whatever the thread count.
+- **The GUI's trend dispersion mode shrinks.**  It left the prior
+  flat and so reported the raw estimates.  It now uses the trended
+  prior, as `--dispersion trend --phi-prior trended` does.
+- **A missing input file is reported in one line.**  `fracfix`,
+  `diffprop` and `plot` answered a missing or unreadable file with a
+  stack trace.  They now name the file and the reason, and exit with
+  status 2.
+
+### Additions
+
+- **The QC report lists the fits.**  A third block gives, for each
+  replicate, every fraction's recovery ratio and global weight, and
+  the unobserved weight, which is FracFixR's `Lost` column.  With
+  `--st1` and `--st2` this is the stability check the paper's
+  Supplementary Note S1 recommends: an unobserved weight that moves
+  with the training window is not identified by the data.
+
+### Documentation
+
+- The Total column of the proportions table holds the predicted
+  Total, the Total that the fit predicts from the fraction reads
+  with the intercept in place of each transcript's own unobserved
+  term.  It is a fitted value, not an estimate of that transcript's
+  unobserved material, and `--out-norm-counts` inherits it.  The
+  help text now says so.
+
+---
+
 ## v2.1.0 "Numbat" 2026-08-08
 
 Demo dataset, resampling schemes and zero handling.  Defaults are

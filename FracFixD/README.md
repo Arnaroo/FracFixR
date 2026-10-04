@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Arnaroo/FracFixR/releases/tag/fracfixd-v2.1.0"><img src="https://img.shields.io/badge/release-v2.1.0%20Numbat-blue" alt="release"></a>
+  <a href="https://github.com/Arnaroo/FracFixR/releases/tag/fracfixd-v2.1.1"><img src="https://img.shields.io/badge/release-v2.1.1%20Numbat-blue" alt="release"></a>
   <a href="https://doi.org/10.5281/zenodo.20234583"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20234583-blue" alt="Zenodo DOI"></a>
   <a href="https://doi.org/10.1093/bioinformatics/btaf615"><img src="https://img.shields.io/badge/Bioinformatics-btaf615-blue" alt="Bioinformatics paper"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/binaries-CC--BY--NC--ND--4.0-lightgrey" alt="binaries licence"></a>
@@ -176,7 +176,7 @@ for you.
 | **Native binary proportions format** | `--out-proportions-bin FILE.bin` writes the FFXD1BIN packed-double format; `diffprop --norm FILE.bin` parses it ~30× faster than the equivalent TSV. |
 | **Deterministic step rule for SIMD reproducibility** | `--bb-step-rule deterministic` opts the beta-binomial fitter into a basin-desensitised L-BFGS-B variant with pure-double special functions, reproducible across CPU microarchitectures and SIMD widths. |
 | **Native SVG volcano plots** | `fracfixd plot --diff FILE --out FILE.svg` renders a publication-grade volcano in SVG 1.1 (renderer-stable across librsvg, Inkscape, Firefox).  Optional `--r-script FILE.R` emits an EnhancedVolcano-style ggplot reproduction script. |
-| **Compositional QC built-in** | `--qc on|strict` runs intercept-stability + per-replicate κ(X) checks before the fits commit; `--qc-report FILE` writes a TSV diagnostic alongside the proportions. |
+| **Compositional QC built-in** | `--qc on|strict` runs intercept-stability + per-replicate κ(X) checks before the fits commit; `--qc-report FILE` writes a TSV diagnostic alongside the proportions, including each replicate's recovery ratios and global weights. |
 | **No telemetry, no cloud, no account** | FracFixD is a desktop / CLI application.  It does not phone home.  All inputs and outputs are local files. |
 
 FracFixR remains the **reference** implementation and the open-
@@ -191,8 +191,8 @@ below for the numerical-agreement contract.
 
 ### Subcommands
 
-- **`fracfixd fracfix:`**  compositional fixup (proportions
-  recovery + lost-fraction estimation).  Produces a self-
+- **`fracfixd fracfix:`**  compositional fixup (per-transcript
+  proportions and the weight of the unobserved fraction).  Produces a self-
   describing proportions TSV / `.bin` you can hand to any
   downstream tool.
 - **`fracfixd diffprop:`** differential-proportion testing
@@ -454,14 +454,14 @@ A native arm64 `.dmg` is shipped alongside the Linux binaries:
 
 ```bash
 # Download the .dmg
-curl -fsSL https://github.com/Arnaroo/FracFixR/raw/main/FracFixD/bin/FracFixD-2.1.0-macos-arm64.dmg \
-     -o FracFixD-2.1.0-macos-arm64.dmg
+curl -fsSL https://github.com/Arnaroo/FracFixR/raw/main/FracFixD/bin/FracFixD-2.1.1-macos-arm64.dmg \
+     -o FracFixD-2.1.1-macos-arm64.dmg
 
 # Verify (compare against SHA256SUMS)
-shasum -a 256 FracFixD-2.1.0-macos-arm64.dmg
+shasum -a 256 FracFixD-2.1.1-macos-arm64.dmg
 
 # Mount + install
-open FracFixD-2.1.0-macos-arm64.dmg
+open FracFixD-2.1.1-macos-arm64.dmg
 # Drag FracFixD.app into the Applications symlink.
 ```
 
@@ -475,7 +475,7 @@ xattr -dr com.apple.quarantine /Applications/FracFixD.app
 ```
 
 For CLI and pipeline use, a relocatable tarball is also shipped:
-`fracfixd-2.1.0-macos-arm64.tar.gz`.  Extract and call
+`fracfixd-2.1.1-macos-arm64.tar.gz`.  Extract and call
 `./fracfixd-macos/bin/fracfixd-launcher.sh --cli ...` from any
 location.
 
@@ -531,14 +531,14 @@ macOS artefacts:
 
 ```powershell
 # PowerShell download the ZIP
-Invoke-WebRequest -Uri https://github.com/Arnaroo/FracFixR/raw/main/FracFixD/bin/fracfixd-v2.1.0-windows-x86_64.zip `
-    -OutFile fracfixd-v2.1.0-windows-x86_64.zip
+Invoke-WebRequest -Uri https://github.com/Arnaroo/FracFixR/raw/main/FracFixD/bin/fracfixd-v2.1.1-windows-x86_64.zip `
+    -OutFile fracfixd-v2.1.1-windows-x86_64.zip
 
 # Verify (compare against SHA256SUMS in the same folder)
-Get-FileHash fracfixd-v2.1.0-windows-x86_64.zip -Algorithm SHA256
+Get-FileHash fracfixd-v2.1.1-windows-x86_64.zip -Algorithm SHA256
 
 # Extract anywhere and double-click `fracfixd-windows\fracfixd.exe`
-Expand-Archive fracfixd-v2.1.0-windows-x86_64.zip -DestinationPath .
+Expand-Archive fracfixd-v2.1.1-windows-x86_64.zip -DestinationPath .
 .\fracfixd-windows\fracfixd-cli.exe --version
 ```
 
@@ -565,7 +565,7 @@ and build tooling are provided by request (see
 
 | Platform | Version | Build exercised |
 |---|---|---|
-| Manjaro Linux, x86_64 | rolling, glibc 2.43 | GUI and static CLI |
+| Manjaro Linux, x86_64 | rolling, glibc 2.44 | GUI and static CLI |
 | macOS, Apple Silicon | 26.2 (Tahoe) | `.app` and tarball |
 | Windows 11, x86_64 | build 22631 | portable ZIP |
 
@@ -754,10 +754,10 @@ fracfixd diffprop ... --permutation 2000 --resample binomial
 fracfixd diffprop ... --permutation 2000 \
     --resample bootstrap --resample-ci-level 0.95
 
-# What to do with a transcript whose pooled Total is empty in at
-# least one (condition, replicate) column.  drop is the default and
-# matches FracFixR.  partial fits on the samples that do have data,
-# provided at least three survive.
+# What to do with a transcript whose Total has no reads in at least
+# one (condition, replicate).  drop is the default and matches
+# FracFixR's GLM route.  partial fits on the samples that do have
+# data, provided at least three survive and both conditions remain.
 fracfixd diffprop ... --zero-handling partial
 fracfixd diffprop ... --zero-handling pseudo --pseudocount 0.5
 ```
@@ -770,7 +770,13 @@ percentile method with the (N+1) plotting position.
 The QC report written by `fracfixd fracfix --qc-report FILE` gained an
 `intercept_share` column in the same release: the fitted intercept
 divided by the mean pooled Total over the rows that entered the fit,
-reported as a diagnostic and not tested against any threshold.
+reported as a diagnostic and not tested against any threshold.  Since
+v2.1.1 it is computed on the training window set by `--st1` and
+`--st2`, and a third block lists each replicate's recovery ratios and
+global weights, with the unobserved weight, which is FracFixR's `Lost`
+column.  Rerunning over a few upper edges, `--st2 0.95` to `0.999`
+say, shows whether that weight is identified by the data: a weight
+that moves with the window is not.
 
 See `fracfixd help diffprop` for the full flag inventory
 (roughly 50 options grouped by purpose, including testing, dispersion,
@@ -887,9 +893,9 @@ software release you used.
 
 > Cleynen, A. & Shirokikh, N. E. *FracFixD: a native-D rewrite of FracFixR for fast compositional fractional fixup and differential proportion testing.*  Zenodo.  https://doi.org/10.5281/zenodo.20234583
 
-**FracFixD v2.1.0 "Numbat" specifically:**
+**FracFixD v2.1.1 "Numbat" specifically:**
 
-> Cleynen, A. & Shirokikh, N. E. (2026). *Arnaroo/FracFixR: FracFixD v2.1.0 "Numbat".*  Zenodo.  https://doi.org/10.5281/zenodo.22153182
+> Cleynen, A. & Shirokikh, N. E. (2026). *Arnaroo/FracFixR: FracFixD v2.1.1 "Numbat".*  Zenodo.  https://doi.org/10.5281/zenodo.22960238
 
 BibTeX:
 
@@ -913,10 +919,10 @@ BibTeX:
                 fast compositional fractional fixup and
                 differential proportion testing}},
   year      = {2026},
-  version   = {2.1.0},
+  version   = {2.1.1},
   publisher = {Zenodo},
-  doi       = {10.5281/zenodo.22153182},
-  url       = {https://doi.org/10.5281/zenodo.22153182}
+  doi       = {10.5281/zenodo.22960238},
+  url       = {https://doi.org/10.5281/zenodo.22960238}
 }
 ```
 
